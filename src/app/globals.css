@@ -16,7 +16,10 @@ html.light {
 
 html,
 body {
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 /* Smooth scrollbar */
@@ -29,12 +32,13 @@ html.light * {
   scrollbar-color: #d4d4d8 transparent;
 }
 
-/* Light-mode overrides for your existing dark Tailwind classes */
+/* Base page colors */
 html.light body {
   background-color: #f8fafc !important;
   color: #18181b !important;
 }
 
+/* Backgrounds */
 html.light .bg-zinc-950 {
   background-color: #f8fafc !important;
 }
@@ -43,12 +47,32 @@ html.light .bg-zinc-950\/80 {
   background-color: rgba(248, 250, 252, 0.88) !important;
 }
 
+html.light .bg-zinc-950\/70 {
+  background-color: rgba(248, 250, 252, 0.82) !important;
+}
+
+html.light .bg-zinc-950\/60 {
+  background-color: #f4f4f5 !important;
+}
+
 html.light .bg-zinc-900 {
   background-color: #ffffff !important;
 }
 
+html.light .bg-zinc-900\/90 {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+}
+
 html.light .bg-zinc-900\/80 {
   background-color: rgba(255, 255, 255, 0.88) !important;
+}
+
+html.light .bg-zinc-900\/70 {
+  background-color: rgba(255, 255, 255, 0.82) !important;
+}
+
+html.light .bg-zinc-900\/60 {
+  background-color: rgba(255, 255, 255, 0.72) !important;
 }
 
 html.light .bg-zinc-800 {
@@ -59,14 +83,32 @@ html.light .bg-zinc-800\/90 {
   background-color: rgba(244, 244, 245, 0.92) !important;
 }
 
+html.light .bg-zinc-800\/80 {
+  background-color: rgba(244, 244, 245, 0.88) !important;
+}
+
+/* Borders */
 html.light .border-zinc-800 {
   border-color: #e4e4e7 !important;
+}
+
+html.light .border-zinc-800\/50 {
+  border-color: rgba(228, 228, 231, 0.7) !important;
 }
 
 html.light .border-zinc-700 {
   border-color: #d4d4d8 !important;
 }
 
+html.light .border-zinc-700\/50 {
+  border-color: rgba(212, 212, 216, 0.7) !important;
+}
+
+html.light .border-zinc-600 {
+  border-color: #a1a1aa !important;
+}
+
+/* Text */
 html.light .text-zinc-100 {
   color: #18181b !important;
 }
@@ -91,15 +133,20 @@ html.light .text-zinc-600 {
   color: #71717a !important;
 }
 
+html.light .text-zinc-700 {
+  color: #52525b !important;
+}
+
 html.light .placeholder-zinc-600::placeholder {
   color: #71717a !important;
 }
 
-html.light .hover\:bg-zinc-700:hover {
+/* Hover states */
+html.light .hover\:bg-zinc-800:hover {
   background-color: #e4e4e7 !important;
 }
 
-html.light .hover\:bg-zinc-800:hover {
+html.light .hover\:bg-zinc-700:hover {
   background-color: #e4e4e7 !important;
 }
 
@@ -113,4 +160,9 @@ html.light .hover\:text-zinc-200:hover {
 
 html.light .hover\:text-zinc-400:hover {
   color: #3f3f46 !important;
+}
+
+/* Softer shadows in light mode */
+html.light .shadow-black\/20 {
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06) !important;
 }

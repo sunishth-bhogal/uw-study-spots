@@ -73,18 +73,15 @@ function getLastReportedAt(location: Location) {
 function hasLiveOccupancyData(location: Location) {
   const capacity = getCapacity(location)
   const currentOccupancy = getCurrentOccupancy(location)
-
   return capacity !== null && capacity > 0 && currentOccupancy !== null && currentOccupancy >= 0
 }
 
 function isWaitzBacked(location: Location) {
   const source = getStringValue(location, ['source'])
   const waitzName = getStringValue(location, ['waitz_name', 'waitzName'])
-
   if (source === 'waitz') return true
   if (waitzName) return true
   if (hasLiveOccupancyData(location)) return true
-
   return false
 }
 
@@ -95,7 +92,6 @@ function hasStudentReportedData(location: Location) {
   const avgQuietness = getNumberValue(location, ['avgQuietness', 'avg_quietness'])
   const avgSeatsAvailable = getNumberValue(location, ['avgSeatsAvailable', 'avg_seats_available'])
   const anyOpenReport = getBooleanValue(location, ['anyOpenReport', 'any_open_report'])
-  const source = getStringValue(location, ['source'])
 
   return (
     reportCount > 0 ||
@@ -103,9 +99,12 @@ function hasStudentReportedData(location: Location) {
     avgCrowdedness !== null ||
     avgQuietness !== null ||
     avgSeatsAvailable !== null ||
-    anyOpenReport !== null ||
-    source === 'community'
+    anyOpenReport !== null
   )
+}
+
+function hasAnyData(location: Location) {
+  return isWaitzBacked(location) || hasStudentReportedData(location)
 }
 
 function compareByName(a: Location, b: Location) {
@@ -126,6 +125,18 @@ function compareByLastReported(a: Location, b: Location) {
   return bTime - aTime
 }
 
+function getCategoryLabel(location: Location) {
+  const category = getStringValue(location, ['category'])
+  switch (category) {
+    case 'library': return 'Library'
+    case 'study_space': return 'Study space'
+    case 'quiet_study': return 'Quiet study'
+    case 'casual_space': return 'Casual study'
+    case 'classroom_space': return 'Classroom study'
+    default: return 'Campus building'
+  }
+}
+
 export default function Dashboard() {
   const [locations, setLocations] = useState<Location[]>([])
   const [fetchedAt, setFetchedAt] = useState<string | null>(null)
@@ -133,6 +144,7 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [sort, setSort] = useState<SortOption>('waitz')
+  const [showEmptySpots, setShowEmptySpots] = useState(false)
 
   const { isFavourite, toggle } = useFavorites()
 
@@ -140,7 +152,6 @@ export default function Dashboard() {
     try {
       const res = await fetch('/api/occupancy')
       if (!res.ok) throw new Error('Failed to fetch')
-
       const data = await res.json()
       setLocations(data.locations ?? [])
       setFetchedAt(data.fetchedAt ?? null)
@@ -178,17 +189,13 @@ export default function Dashboard() {
         const aFav = isFavourite(a.id) ? 0 : 1
         const bFav = isFavourite(b.id) ? 0 : 1
         if (aFav !== bFav) return aFav - bFav
-
         const aWaitz = isWaitzBacked(a) ? 0 : 1
         const bWaitz = isWaitzBacked(b) ? 0 : 1
         if (aWaitz !== bWaitz) return aWaitz - bWaitz
-
         const busynessDiff = compareByBusynessDesc(a, b)
         if (busynessDiff !== 0) return busynessDiff
-
         const reportsDiff = compareByReportsDesc(a, b)
         if (reportsDiff !== 0) return reportsDiff
-
         return compareByName(a, b)
       }
 
@@ -196,17 +203,13 @@ export default function Dashboard() {
         const aWaitz = isWaitzBacked(a) ? 0 : 1
         const bWaitz = isWaitzBacked(b) ? 0 : 1
         if (aWaitz !== bWaitz) return aWaitz - bWaitz
-
         const aLive = hasLiveOccupancyData(a) ? 0 : 1
         const bLive = hasLiveOccupancyData(b) ? 0 : 1
         if (aLive !== bLive) return aLive - bLive
-
         const busynessDiff = compareByBusynessDesc(a, b)
         if (busynessDiff !== 0) return busynessDiff
-
         const reportsDiff = compareByReportsDesc(a, b)
         if (reportsDiff !== 0) return reportsDiff
-
         return compareByName(a, b)
       }
 
@@ -214,16 +217,12 @@ export default function Dashboard() {
         const aStudent = hasStudentReportedData(a) ? 0 : 1
         const bStudent = hasStudentReportedData(b) ? 0 : 1
         if (aStudent !== bStudent) return aStudent - bStudent
-
         const reportsDiff = compareByReportsDesc(a, b)
         if (reportsDiff !== 0) return reportsDiff
-
         const recentDiff = compareByLastReported(a, b)
         if (recentDiff !== 0) return recentDiff
-
         const busynessDiff = compareByBusynessDesc(a, b)
         if (busynessDiff !== 0) return busynessDiff
-
         return compareByName(a, b)
       }
 
@@ -231,18 +230,21 @@ export default function Dashboard() {
     })
   }, [allVisibleLocations, search, sort, isFavourite])
 
-  const liveDataLocations = useMemo(() => {
+  const activeLocations = useMemo(() => filtered.filter(hasAnyData), [filtered])
+  const emptyLocations = useMemo(() => filtered.filter((l) => !hasAnyData(l)), [filtered])
+
+  const busynessLocations = useMemo(() => {
     return allVisibleLocations.filter(
-      (location) => isWaitzBacked(location) || hasLiveOccupancyData(location)
+      (location) => hasLiveOccupancyData(location) || hasStudentReportedData(location)
     )
   }, [allVisibleLocations])
-
+  
   const avgLiveBusyness = useMemo(() => {
-    if (liveDataLocations.length === 0) return null
-
-    const total = liveDataLocations.reduce((sum, location) => sum + getBusyness(location), 0)
-    return Math.round(total / liveDataLocations.length)
-  }, [liveDataLocations])
+    if (busynessLocations.length === 0) return null
+  
+    const total = busynessLocations.reduce((sum, location) => sum + getBusyness(location), 0)
+    return Math.round(total / busynessLocations.length)
+  }, [busynessLocations])
 
   const reportedLocationsCount = useMemo(() => {
     return allVisibleLocations.filter((location) => hasStudentReportedData(location)).length
@@ -266,7 +268,6 @@ export default function Dashboard() {
             <div className="text-2xl font-bold text-zinc-100">{allVisibleLocations.length}</div>
             <div className="text-xs text-zinc-500">Spots listed</div>
           </div>
-
           <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-center">
             <div
               className={`text-2xl font-bold ${
@@ -283,7 +284,6 @@ export default function Dashboard() {
             </div>
             <div className="text-xs text-zinc-500">Live busyness</div>
           </div>
-
           <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-center">
             <div className="text-2xl font-bold text-zinc-100">{reportedLocationsCount}</div>
             <div className="text-xs text-zinc-500">Student-rated spots</div>
@@ -302,7 +302,6 @@ export default function Dashboard() {
               levels.
             </p>
           </div>
-
           <div className="grid gap-3 md:grid-cols-3">
             <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4">
               <div className="mb-1 text-sm font-semibold text-zinc-100">Live occupancy</div>
@@ -311,7 +310,6 @@ export default function Dashboard() {
                 current live occupancy data where available.
               </p>
             </div>
-
             <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4">
               <div className="mb-1 text-sm font-semibold text-zinc-100">Student reports</div>
               <p className="text-sm text-zinc-500">
@@ -319,7 +317,6 @@ export default function Dashboard() {
                 community submissions to show quietness, seating, and crowd conditions.
               </p>
             </div>
-
             <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4">
               <div className="mb-1 text-sm font-semibold text-zinc-100">Freshness matters</div>
               <p className="text-sm text-zinc-500">
@@ -335,9 +332,7 @@ export default function Dashboard() {
         <div className="mb-6">
           <div className="mb-3">
             <h2 className="text-lg font-semibold text-zinc-100">See it on the map</h2>
-            <p className="text-sm text-zinc-500">
-              Explore every listed study spot across campus.
-            </p>
+            <p className="text-sm text-zinc-500">Explore every listed study spot across campus.</p>
           </div>
           <CampusMap locations={filtered} />
         </div>
@@ -351,7 +346,6 @@ export default function Dashboard() {
           onChange={(e) => setSearch(e.target.value)}
           className="flex-1 rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 transition-colors focus:border-gold-500 focus:outline-none"
         />
-
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value as SortOption)}
@@ -398,16 +392,58 @@ export default function Dashboard() {
       ) : filtered.length === 0 ? (
         <p className="py-16 text-center text-zinc-600">No study spots match your search.</p>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((loc) => (
-            <LocationCard
-              key={loc.id}
-              location={loc}
-              isFavourite={isFavourite(loc.id)}
-              onToggleFavourite={toggle}
-            />
-          ))}
-        </div>
+        <>
+          {activeLocations.length > 0 && (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {activeLocations.map((loc) => (
+                <LocationCard
+                  key={loc.id}
+                  location={loc}
+                  isFavourite={isFavourite(loc.id)}
+                  onToggleFavourite={toggle}
+                />
+              ))}
+            </div>
+          )}
+
+          {emptyLocations.length > 0 && (
+            <div className="mt-8 text-center">
+              <button
+                onClick={() => setShowEmptySpots((v) => !v)}
+                className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
+              >
+                {showEmptySpots
+                  ? `Hide ${emptyLocations.length} spots with no data yet ▲`
+                  : `+ ${emptyLocations.length} more spots with no data yet ▼`}
+              </button>
+
+              {showEmptySpots && (
+                <div className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-900 divide-y divide-zinc-800 text-left">
+                  {emptyLocations.map((loc) => (
+                    <div
+                      key={loc.id}
+                      className="flex items-center justify-between px-4 py-3 hover:bg-zinc-800/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className="h-2 w-2 flex-shrink-0 rounded-full bg-zinc-600" />
+                        <span className="text-sm text-zinc-300 truncate">{loc.name}</span>
+                        <span className="hidden sm:inline text-xs text-zinc-600 flex-shrink-0">
+                          {getCategoryLabel(loc)}
+                        </span>
+                      </div>
+                      <a
+                        href={`/location/${loc.id}`}
+                        className="flex-shrink-0 ml-4 text-xs text-gold-500 hover:text-gold-400 transition-colors whitespace-nowrap"
+                      >
+                        Be the first to report →
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </>
       )}
     </div>
   )

@@ -1278,6 +1278,9 @@ video {
 .ml-2 {
   margin-left: 0.5rem;
 }
+.ml-4 {
+  margin-left: 1rem;
+}
 .ml-auto {
   margin-left: auto;
 }
@@ -1404,6 +1407,10 @@ video {
 .shrink-0 {
   flex-shrink: 0;
 }
+.rotate-90 {
+  --tw-rotate: 90deg;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
 @keyframes pulse {
 
   50% {
@@ -1490,8 +1497,25 @@ video {
   margin-top: calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));
   margin-bottom: calc(1.5rem * var(--tw-space-y-reverse));
 }
+.divide-y > :not([hidden]) ~ :not([hidden]) {
+  --tw-divide-y-reverse: 0;
+  border-top-width: calc(1px * calc(1 - var(--tw-divide-y-reverse)));
+  border-bottom-width: calc(1px * var(--tw-divide-y-reverse));
+}
+.divide-zinc-800 > :not([hidden]) ~ :not([hidden]) {
+  --tw-divide-opacity: 1;
+  border-color: rgb(39 39 42 / var(--tw-divide-opacity, 1));
+}
 .overflow-hidden {
   overflow: hidden;
+}
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.whitespace-nowrap {
+  white-space: nowrap;
 }
 .rounded {
   border-radius: 0.25rem;
@@ -1605,11 +1629,11 @@ video {
 .p-4 {
   padding: 1rem;
 }
-.p-6 {
-  padding: 1.5rem;
-}
 .p-5 {
   padding: 1.25rem;
+}
+.p-6 {
+  padding: 1.5rem;
 }
 .px-2 {
   padding-left: 0.5rem;
@@ -1647,6 +1671,10 @@ video {
   padding-top: 0.625rem;
   padding-bottom: 0.625rem;
 }
+.py-3 {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
 .py-6 {
   padding-top: 1.5rem;
   padding-bottom: 1.5rem;
@@ -1657,6 +1685,9 @@ video {
 }
 .pb-4 {
   padding-bottom: 1rem;
+}
+.text-left {
+  text-align: left;
 }
 .text-center {
   text-align: center;
@@ -1840,7 +1871,10 @@ html.light {
 
 html,
 body {
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 /* Smooth scrollbar */
@@ -1853,12 +1887,13 @@ html.light * {
   scrollbar-color: #d4d4d8 transparent;
 }
 
-/* Light-mode overrides for your existing dark Tailwind classes */
+/* Base page colors */
 html.light body {
   background-color: #f8fafc !important;
   color: #18181b !important;
 }
 
+/* Backgrounds */
 html.light .bg-zinc-950 {
   background-color: #f8fafc !important;
 }
@@ -1867,12 +1902,32 @@ html.light .bg-zinc-950\/80 {
   background-color: rgba(248, 250, 252, 0.88) !important;
 }
 
+html.light .bg-zinc-950\/70 {
+  background-color: rgba(248, 250, 252, 0.82) !important;
+}
+
+html.light .bg-zinc-950\/60 {
+  background-color: #f4f4f5 !important;
+}
+
 html.light .bg-zinc-900 {
   background-color: #ffffff !important;
 }
 
+html.light .bg-zinc-900\/90 {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+}
+
 html.light .bg-zinc-900\/80 {
   background-color: rgba(255, 255, 255, 0.88) !important;
+}
+
+html.light .bg-zinc-900\/70 {
+  background-color: rgba(255, 255, 255, 0.82) !important;
+}
+
+html.light .bg-zinc-900\/60 {
+  background-color: rgba(255, 255, 255, 0.72) !important;
 }
 
 html.light .bg-zinc-800 {
@@ -1883,14 +1938,32 @@ html.light .bg-zinc-800\/90 {
   background-color: rgba(244, 244, 245, 0.92) !important;
 }
 
+html.light .bg-zinc-800\/80 {
+  background-color: rgba(244, 244, 245, 0.88) !important;
+}
+
+/* Borders */
 html.light .border-zinc-800 {
   border-color: #e4e4e7 !important;
+}
+
+html.light .border-zinc-800\/50 {
+  border-color: rgba(228, 228, 231, 0.7) !important;
 }
 
 html.light .border-zinc-700 {
   border-color: #d4d4d8 !important;
 }
 
+html.light .border-zinc-700\/50 {
+  border-color: rgba(212, 212, 216, 0.7) !important;
+}
+
+html.light .border-zinc-600 {
+  border-color: #a1a1aa !important;
+}
+
+/* Text */
 html.light .text-zinc-100 {
   color: #18181b !important;
 }
@@ -1915,6 +1988,10 @@ html.light .text-zinc-600 {
   color: #71717a !important;
 }
 
+html.light .text-zinc-700 {
+  color: #52525b !important;
+}
+
 html.light .placeholder-zinc-600::-moz-placeholder {
   color: #71717a !important;
 }
@@ -1923,11 +2000,12 @@ html.light .placeholder-zinc-600::placeholder {
   color: #71717a !important;
 }
 
-html.light .hover\:bg-zinc-700:hover {
+/* Hover states */
+html.light .hover\:bg-zinc-800:hover {
   background-color: #e4e4e7 !important;
 }
 
-html.light .hover\:bg-zinc-800:hover {
+html.light .hover\:bg-zinc-700:hover {
   background-color: #e4e4e7 !important;
 }
 
@@ -1943,125 +2021,111 @@ html.light .hover\:text-zinc-400:hover {
   color: #3f3f46 !important;
 }
 
+/* Softer shadows in light mode */
+html.light .shadow-black\/20 {
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06) !important;
+}
 .last\:border-b-0:last-child {
   border-bottom-width: 0px;
 }
-
 .last\:pb-0:last-child {
   padding-bottom: 0px;
 }
-
 .hover\:-translate-y-0\.5:hover {
   --tw-translate-y: -0.125rem;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
-
 .hover\:scale-110:hover {
   --tw-scale-x: 1.1;
   --tw-scale-y: 1.1;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
-
 .hover\:border-zinc-500:hover {
   --tw-border-opacity: 1;
   border-color: rgb(113 113 122 / var(--tw-border-opacity, 1));
 }
-
 .hover\:border-zinc-600:hover {
   --tw-border-opacity: 1;
   border-color: rgb(82 82 91 / var(--tw-border-opacity, 1));
 }
-
 .hover\:border-zinc-700:hover {
   --tw-border-opacity: 1;
   border-color: rgb(63 63 70 / var(--tw-border-opacity, 1));
 }
-
 .hover\:bg-gold-400:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(245 200 66 / var(--tw-bg-opacity, 1));
 }
-
 .hover\:bg-zinc-700:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(63 63 70 / var(--tw-bg-opacity, 1));
 }
-
 .hover\:bg-zinc-800:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(39 39 42 / var(--tw-bg-opacity, 1));
 }
-
+.hover\:bg-zinc-800\/50:hover {
+  background-color: rgb(39 39 42 / 0.5);
+}
+.hover\:text-gold-400:hover {
+  --tw-text-opacity: 1;
+  color: rgb(245 200 66 / var(--tw-text-opacity, 1));
+}
 .hover\:text-zinc-200:hover {
   --tw-text-opacity: 1;
   color: rgb(228 228 231 / var(--tw-text-opacity, 1));
 }
-
 .hover\:text-zinc-300:hover {
   --tw-text-opacity: 1;
   color: rgb(212 212 216 / var(--tw-text-opacity, 1));
 }
-
 .hover\:text-zinc-400:hover {
   --tw-text-opacity: 1;
   color: rgb(161 161 170 / var(--tw-text-opacity, 1));
 }
-
 .hover\:opacity-90:hover {
   opacity: 0.9;
 }
-
 .hover\:shadow-lg:hover {
   --tw-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   --tw-shadow-colored: 0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
-
 .hover\:shadow-black\/20:hover {
   --tw-shadow-color: rgb(0 0 0 / 0.2);
   --tw-shadow: var(--tw-shadow-colored);
 }
-
 .focus\:border-gold-500:focus {
   --tw-border-opacity: 1;
   border-color: rgb(230 184 0 / var(--tw-border-opacity, 1));
 }
-
 .focus\:outline-none:focus {
   outline: 2px solid transparent;
   outline-offset: 2px;
 }
-
 .disabled\:cursor-not-allowed:disabled {
   cursor: not-allowed;
 }
-
 .disabled\:opacity-40:disabled {
   opacity: 0.4;
 }
-
 .disabled\:opacity-50:disabled {
   opacity: 0.5;
 }
-
 .disabled\:opacity-60:disabled {
   opacity: 0.6;
 }
-
 .group:hover .group-hover\:translate-x-0\.5 {
   --tw-translate-x: 0.125rem;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
-
 .group:hover .group-hover\:border-gold-500\/50 {
   border-color: rgb(230 184 0 / 0.5);
 }
-
 .group:hover .group-hover\:text-gold-400 {
   --tw-text-opacity: 1;
   color: rgb(245 200 66 / var(--tw-text-opacity, 1));
 }
-
 @media (min-width: 640px) {
 
   .sm\:inline {
@@ -2088,14 +2152,12 @@ html.light .hover\:text-zinc-400:hover {
     text-align: right;
   }
 }
-
 @media (min-width: 768px) {
 
   .md\:grid-cols-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
-
 @media (min-width: 1024px) {
 
   .lg\:grid-cols-2 {
