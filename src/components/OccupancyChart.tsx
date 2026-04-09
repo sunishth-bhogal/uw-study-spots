@@ -19,6 +19,20 @@ interface Props {
   locationId: string
 }
 
+type RecentChartPoint = HistoryPoint & {
+  sortKey: number
+  axisLabel: string
+  tooltipLabel: string
+  busyness: number
+}
+
+type TypicalChartPoint = {
+  hour: number
+  label: string
+  busyness: number
+  hasData: boolean
+}
+
 function formatHourLabel(hour: number) {
   if (hour === 0) return '12 AM'
   if (hour < 12) return `${hour} AM`
@@ -46,6 +60,60 @@ function parseDateLike(value: unknown): Date | null {
   return null
 }
 
+function TypicalTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean
+  payload?: Array<{ value?: number; payload?: TypicalChartPoint }>
+  label?: string
+}) {
+  if (!active || !payload?.length) return null
+
+  const point = payload[0]?.payload
+  if (!point) return null
+
+  return (
+    <div className="min-w-[180px] rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 shadow-xl">
+      <div className="text-sm font-semibold text-zinc-100">{label}</div>
+      <div className="mt-1 text-sm text-zinc-300">
+        {point.hasData ? (
+          <>
+            Typical busyness:{' '}
+            <span className="font-medium text-gold-400">{point.busyness}%</span>
+          </>
+        ) : (
+          <span className="text-zinc-400">No data yet</span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function RecentTooltip({
+  active,
+  payload,
+}: {
+  active?: boolean
+  payload?: Array<{ payload?: RecentChartPoint; value?: number }>
+}) {
+  if (!active || !payload?.length) return null
+
+  const point = payload[0]?.payload
+  if (!point) return null
+
+  return (
+    <div className="min-w-[200px] rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 shadow-xl">
+      <div className="text-sm font-semibold text-zinc-100">{point.tooltipLabel}</div>
+      <div className="mt-1 text-sm text-zinc-300">
+        Busyness:{' '}
+        <span className="font-medium text-gold-400">{point.busyness}%</span>
+      </div>
+    </div>
+  )
+}
+
 export function OccupancyChart({ locationId }: Props) {
   const [history, setHistory] = useState<HistoryPoint[]>([])
   const [typical, setTypical] = useState<TypicalHour[]>([])
@@ -67,7 +135,7 @@ export function OccupancyChart({ locationId }: Props) {
       .finally(() => setLoading(false))
   }, [locationId])
 
-  const recentChartData = useMemo(() => {
+  const recentChartData = useMemo<RecentChartPoint[]>(() => {
     return history
       .map((point, index) => {
         const parsedDate = parseDateLike(point.time) ?? parseDateLike(point.hour)
@@ -98,7 +166,7 @@ export function OccupancyChart({ locationId }: Props) {
       .sort((a, b) => a.sortKey - b.sortKey)
   }, [history])
 
-  const typicalChartData = useMemo(() => {
+  const typicalChartData = useMemo<TypicalChartPoint[]>(() => {
     return typical
       .filter((h) => h.hour >= 7 && h.hour <= 23)
       .map((h) => ({
@@ -114,7 +182,7 @@ export function OccupancyChart({ locationId }: Props) {
 
   if (loading) {
     return (
-      <div className="h-48 flex items-center justify-center text-zinc-600 text-sm">
+      <div className="flex h-48 items-center justify-center text-sm text-zinc-600">
         Loading chart data…
       </div>
     )
@@ -122,14 +190,14 @@ export function OccupancyChart({ locationId }: Props) {
 
   return (
     <div>
-      <div className="flex gap-2 mb-4">
+      <div className="mb-4 flex gap-2">
         {(['recent', 'typical'] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`px-3 py-1 rounded-lg text-sm transition-all ${
+            className={`rounded-lg px-3 py-1 text-sm transition-all ${
               tab === t
-                ? 'bg-gold-500 text-zinc-900 font-semibold'
+                ? 'bg-gold-500 font-semibold text-zinc-900'
                 : 'bg-zinc-800 text-zinc-400 hover:text-zinc-200'
             }`}
           >
@@ -140,7 +208,7 @@ export function OccupancyChart({ locationId }: Props) {
 
       {tab === 'recent' ? (
         recentChartData.length === 0 ? (
-          <p className="text-zinc-600 text-sm text-center py-8">
+          <p className="py-8 text-center text-sm text-zinc-600">
             Not enough data yet — check back after a few hours.
           </p>
         ) : (
@@ -149,26 +217,17 @@ export function OccupancyChart({ locationId }: Props) {
               <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" />
               <XAxis
                 dataKey="axisLabel"
-                tick={{ fill: '#71717a', fontSize: 11 }}
+                tick={{ fill: '#a1a1aa', fontSize: 11 }}
                 interval="preserveStartEnd"
               />
               <YAxis
                 domain={[0, 100]}
-                tick={{ fill: '#71717a', fontSize: 11 }}
+                tick={{ fill: '#a1a1aa', fontSize: 11 }}
                 tickFormatter={(v) => `${v}%`}
               />
               <Tooltip
-                contentStyle={{
-                  background: '#18181b',
-                  border: '1px solid #3f3f46',
-                  borderRadius: 8,
-                }}
-                labelStyle={{ color: '#d4d4d8' }}
-                labelFormatter={(_label, payload) => {
-                  const point = payload?.[0]?.payload
-                  return point?.tooltipLabel ?? ''
-                }}
-                formatter={(v: number) => [`${v}%`, 'Busyness']}
+                content={<RecentTooltip />}
+                cursor={{ stroke: '#52525b', strokeDasharray: '4 4' }}
               />
               <Line
                 type="monotone"
@@ -181,7 +240,7 @@ export function OccupancyChart({ locationId }: Props) {
           </ResponsiveContainer>
         )
       ) : typicalChartData.length === 0 ? (
-        <p className="text-zinc-600 text-sm text-center py-8">
+        <p className="py-8 text-center text-sm text-zinc-600">
           Need more historical data to show typical patterns.
         </p>
       ) : (
@@ -190,32 +249,24 @@ export function OccupancyChart({ locationId }: Props) {
             <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" />
             <XAxis
               dataKey="label"
-              tick={{ fill: '#71717a', fontSize: 11 }}
+              tick={{ fill: '#a1a1aa', fontSize: 11 }}
               interval={1}
             />
             <YAxis
               domain={[0, 100]}
-              tick={{ fill: '#71717a', fontSize: 11 }}
+              tick={{ fill: '#a1a1aa', fontSize: 11 }}
               tickFormatter={(v) => `${v}%`}
             />
             <Tooltip
-              contentStyle={{
-                background: '#18181b',
-                border: '1px solid #3f3f46',
-                borderRadius: 8,
-              }}
-              labelStyle={{ color: '#d4d4d8' }}
-              formatter={(v: number, _name, props) => {
-                return props.payload?.hasData
-                  ? [`${v}%`, 'Typical busyness']
-                  : ['No data', 'Typical busyness']
-              }}
+              content={<TypicalTooltip />}
+              cursor={{ fill: 'rgba(250, 204, 21, 0.08)' }}
             />
-            <Bar dataKey="busyness" radius={[4, 4, 0, 0]}>
+            <Bar dataKey="busyness" radius={[4, 4, 0, 0]} maxBarSize={36}>
               {typicalChartData.map((entry) => (
                 <Cell
                   key={entry.hour}
                   fill={entry.hasData ? barColor(entry.busyness) : '#3f3f46'}
+                  opacity={entry.hasData ? 1 : 0.45}
                 />
               ))}
             </Bar>
