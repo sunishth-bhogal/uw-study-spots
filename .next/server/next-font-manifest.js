@@ -1,0 +1,1 @@
+self.__NEXT_FONT_MANIFEST="{\"pages\":{},\"app\":{\"/Users/sunishth.28/uw-study-spots/uw-study-spots/src/app/layout\":[\"static/media/e4af272ccee01ff0-s.p.woff2\"]},\"appUsingSizeAdjust\":true,\"pagesUsingSizeAdjust\":false}"
