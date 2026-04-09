@@ -6,8 +6,111 @@
   --gold: #FED141;
 }
 
+html.dark {
+  color-scheme: dark;
+}
+
+html.light {
+  color-scheme: light;
+}
+
+html,
+body {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
 /* Smooth scrollbar */
 * {
   scrollbar-width: thin;
   scrollbar-color: #3f3f46 transparent;
+}
+
+html.light * {
+  scrollbar-color: #d4d4d8 transparent;
+}
+
+/* Light-mode overrides for your existing dark Tailwind classes */
+html.light body {
+  background-color: #f8fafc !important;
+  color: #18181b !important;
+}
+
+html.light .bg-zinc-950 {
+  background-color: #f8fafc !important;
+}
+
+html.light .bg-zinc-950\/80 {
+  background-color: rgba(248, 250, 252, 0.88) !important;
+}
+
+html.light .bg-zinc-900 {
+  background-color: #ffffff !important;
+}
+
+html.light .bg-zinc-900\/80 {
+  background-color: rgba(255, 255, 255, 0.88) !important;
+}
+
+html.light .bg-zinc-800 {
+  background-color: #f4f4f5 !important;
+}
+
+html.light .bg-zinc-800\/90 {
+  background-color: rgba(244, 244, 245, 0.92) !important;
+}
+
+html.light .border-zinc-800 {
+  border-color: #e4e4e7 !important;
+}
+
+html.light .border-zinc-700 {
+  border-color: #d4d4d8 !important;
+}
+
+html.light .text-zinc-100 {
+  color: #18181b !important;
+}
+
+html.light .text-zinc-200 {
+  color: #27272a !important;
+}
+
+html.light .text-zinc-300 {
+  color: #3f3f46 !important;
+}
+
+html.light .text-zinc-400 {
+  color: #52525b !important;
+}
+
+html.light .text-zinc-500 {
+  color: #71717a !important;
+}
+
+html.light .text-zinc-600 {
+  color: #71717a !important;
+}
+
+html.light .placeholder-zinc-600::placeholder {
+  color: #71717a !important;
+}
+
+html.light .hover\:bg-zinc-700:hover {
+  background-color: #e4e4e7 !important;
+}
+
+html.light .hover\:bg-zinc-800:hover {
+  background-color: #e4e4e7 !important;
+}
+
+html.light .hover\:border-zinc-600:hover {
+  border-color: #a1a1aa !important;
+}
+
+html.light .hover\:text-zinc-200:hover {
+  color: #18181b !important;
+}
+
+html.light .hover\:text-zinc-400:hover {
+  color: #3f3f46 !important;
 }
