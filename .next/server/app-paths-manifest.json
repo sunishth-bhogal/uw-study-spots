@@ -1,7 +1,5 @@
 {
   "/api/occupancy/route": "app/api/occupancy/route.js",
-  "/location/[id]/page": "app/location/[id]/page.js",
-  "/api/history/[locationId]/route": "app/api/history/[locationId]/route.js",
-  "/api/reports/community/route": "app/api/reports/community/route.js",
-  "/page": "app/page.js"
+  "/page": "app/page.js",
+  "/location/[id]/page": "app/location/[id]/page.js"
 }
