@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import { Inter } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/next'
 import 'leaflet/dist/leaflet.css'
 import './globals.css'
 
@@ -45,9 +46,7 @@ export default function RootLayout({
               </span>
             </a>
 
-            <span className="text-xs text-zinc-500">
-              Updated every 10 min
-            </span>
+            <span className="text-xs text-zinc-500">Updated every 10 min</span>
           </div>
         </nav>
 
@@ -56,8 +55,10 @@ export default function RootLayout({
         </main>
 
         <footer className="border-t border-zinc-800 mt-12 py-6 text-center text-xs text-zinc-600">
-          Built by Sunishth Bhogal · Data from Waitz & Collected from Current uw students · Not affiliated with UWaterloo
+          Built by Sunishth Bhogal · Data from Waitz and UW student reports · Not affiliated with UWaterloo
         </footer>
+
+        <Analytics />
       </body>
     </html>
   )
