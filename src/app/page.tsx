@@ -146,7 +146,7 @@ export default function Dashboard() {
       setFetchedAt(data.fetchedAt ?? null)
       setError(null)
     } catch {
-      setError('Could not load locations. Try refreshing.')
+      setError('Could not load study spots. Try refreshing.')
     } finally {
       setLoading(false)
     }
@@ -250,10 +250,10 @@ export default function Dashboard() {
     <div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-zinc-100 mb-1">
-          Study spots across campus <span className="text-gold-500">in one place</span>
+          Find the best <span className="text-gold-500">study spot</span> at UW right now
         </h1>
         <p className="text-zinc-500 text-sm">
-          Live occupancy where available, plus community-reported study spots across UW campus.
+          Live busyness where available, plus student reports on quietness, seating, and crowd levels across campus.
         </p>
       </div>
 
@@ -263,7 +263,7 @@ export default function Dashboard() {
             <div className="text-2xl font-bold text-zinc-100">
               {allVisibleLocations.length}
             </div>
-            <div className="text-xs text-zinc-500">Locations listed</div>
+            <div className="text-xs text-zinc-500">Spots listed</div>
           </div>
 
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-center">
@@ -280,14 +280,14 @@ export default function Dashboard() {
             >
               {avgLiveBusyness === null ? '—' : `${avgLiveBusyness}%`}
             </div>
-            <div className="text-xs text-zinc-500">Avg. live busyness</div>
+            <div className="text-xs text-zinc-500">Live busyness</div>
           </div>
 
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-center">
             <div className="text-2xl font-bold text-zinc-100">
               {reportedLocationsCount}
             </div>
-            <div className="text-xs text-zinc-500">Locations with reports</div>
+            <div className="text-xs text-zinc-500">Student-rated spots</div>
           </div>
         </div>
       )}
@@ -295,9 +295,9 @@ export default function Dashboard() {
       {!loading && !error && filtered.length > 0 && (
         <div className="mb-6">
           <div className="mb-3">
-            <h2 className="text-lg font-semibold text-zinc-100">Campus map</h2>
+            <h2 className="text-lg font-semibold text-zinc-100">See it on the map</h2>
             <p className="text-sm text-zinc-500">
-              Browse every listed campus location visually.
+              Explore every listed study spot across campus.
             </p>
           </div>
           <CampusMap locations={filtered} />
@@ -307,7 +307,7 @@ export default function Dashboard() {
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <input
           type="text"
-          placeholder="Search locations…"
+          placeholder="Search a building or study spot…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-gold-500 transition-colors"
@@ -318,21 +318,21 @@ export default function Dashboard() {
           onChange={(e) => setSort(e.target.value as SortOption)}
           className="bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-zinc-300 focus:outline-none focus:border-gold-500 transition-colors"
         >
-          <option value="waitz">Waitz / live data first</option>
-          <option value="student-reported">Student reported first</option>
+          <option value="waitz">Live data first</option>
+          <option value="student-reported">Student insight first</option>
           <option value="favourites">Favourites first</option>
         </select>
       </div>
 
       {fetchedAt && (
         <p className="text-xs text-zinc-600 mb-4">
-          Last updated {formatDistanceToNow(new Date(fetchedAt), { addSuffix: true })}
+          Updated {formatDistanceToNow(new Date(fetchedAt), { addSuffix: true })}
           {' · '}
           <button
             onClick={fetchOccupancy}
             className="underline hover:text-zinc-400 transition-colors"
           >
-            Refresh
+            Refresh now
           </button>
         </p>
       )}
@@ -357,7 +357,7 @@ export default function Dashboard() {
           </button>
         </div>
       ) : filtered.length === 0 ? (
-        <p className="text-center text-zinc-600 py-16">No locations match your search.</p>
+        <p className="text-center text-zinc-600 py-16">No study spots match your search.</p>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((loc) => (
