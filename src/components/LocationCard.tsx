@@ -43,9 +43,7 @@ function getSource(location: Location) {
 }
 
 function getReportCount(location: Location) {
-  return (
-    getNumberValue(location, ['reportCount', 'report_count']) ?? 0
-  )
+  return getNumberValue(location, ['reportCount', 'report_count']) ?? 0
 }
 
 function getLastReportedAt(location: Location) {
@@ -53,9 +51,7 @@ function getLastReportedAt(location: Location) {
 }
 
 function getCurrentOccupancy(location: Location) {
-  return (
-    getNumberValue(location, ['currentOccupancy', 'current_occupancy', 'count']) ?? 0
-  )
+  return getNumberValue(location, ['currentOccupancy', 'current_occupancy', 'count']) ?? 0
 }
 
 function getCapacity(location: Location) {
@@ -164,97 +160,103 @@ export function LocationCard({ location, isFavourite, onToggleFavourite, compact
   return (
     <div
       className={clsx(
-        'bg-zinc-900 border border-zinc-800 rounded-2xl p-4 hover:border-zinc-600 transition-all',
+        'group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-4 transition-all hover:-translate-y-0.5 hover:border-zinc-600 hover:shadow-lg hover:shadow-black/20',
         isFavourite && 'border-gold-500/40'
       )}
     >
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className={clsx('w-2 h-2 rounded-full flex-shrink-0 mt-1', dotColor)} />
-          <Link
-            href={`/location/${location.id}`}
-            className="font-semibold text-zinc-100 hover:text-gold-400 transition-colors leading-tight"
-          >
-            {location.name}
-          </Link>
-        </div>
-
-        <button
-          onClick={() => onToggleFavourite(location.id)}
-          aria-label={isFavourite ? 'Remove from favourites' : 'Add to favourites'}
-          className="text-lg leading-none ml-2 flex-shrink-0 transition-transform hover:scale-110"
-        >
-          {isFavourite ? '⭐' : '☆'}
-        </button>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-2 mb-2">
-        <span
-          className={clsx(
-            'text-xs font-medium px-2 py-0.5 rounded-full',
-            primaryBadgeClass
-          )}
-        >
-          {primaryBadge}
-        </span>
-
-        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300">
-          {getCategoryLabel(location)}
-        </span>
-      </div>
-
-      <div className="text-xs text-zinc-500 mb-3">
-        {summaryText}
-      </div>
-
-      {liveData || reportCount > 0 ? (
-        <BusynessBar busyness={location.busyness} />
-      ) : lastReading ? (
-        <div className="mt-1 mb-2">
-          <div className="flex justify-between text-xs text-zinc-500 mb-1">
-            <span>
-              Last seen · {formatDistanceToNow(new Date(lastReading.recorded_at), { addSuffix: true })}
-            </span>
-            <span>{lastReading.busyness}%</span>
-          </div>
-          <BusynessBar busyness={lastReading.busyness} size="sm" />
-        </div>
-      ) : (
-        <div className="text-sm text-zinc-500 mb-2">
-          No live occupancy or recent student reports yet.
-        </div>
-      )}
-
-      {!compact && liveData && subLocations.length > 0 && (
-        <div className="mt-3 space-y-2">
-          {subLocations.map((sub) => {
-            const hasSubCapacity =
-              Number.isFinite(sub.capacity) &&
-              Number.isFinite(sub.count) &&
-              sub.capacity > 0
-
-            return (
-              <div key={sub.name}>
-                <div className="flex justify-between text-xs text-zinc-500 mb-1">
-                  <span>{sub.name}</span>
-                  <span>
-                    {hasSubCapacity ? `${sub.count}/${sub.capacity}` : `${sub.busyness}% busy`}
-                  </span>
-                </div>
-                <BusynessBar busyness={sub.busyness} showLabel={false} size="sm" />
-              </div>
-            )
-          })}
-        </div>
-      )}
-
-
       <Link
         href={`/location/${location.id}`}
-        className="block mt-3 text-center text-xs text-zinc-600 hover:text-gold-400 transition-colors"
+        aria-label={`View details for ${location.name}`}
+        className="absolute inset-0 z-0"
+      />
+
+      <button
+        onClick={() => onToggleFavourite(location.id)}
+        aria-label={isFavourite ? 'Remove from favourites' : 'Add to favourites'}
+        className="relative z-20 ml-auto block text-lg leading-none transition-transform hover:scale-110"
       >
-        View history & seat reports →
-      </Link>
+        {isFavourite ? '⭐' : '☆'}
+      </button>
+
+      <div className="relative z-10 -mt-6 pointer-events-none">
+        <div className="mb-3 flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex items-start gap-2 min-w-0">
+              <span className={clsx('mt-1 h-2 w-2 flex-shrink-0 rounded-full', dotColor)} />
+              <h3 className="leading-tight font-semibold text-zinc-100 transition-colors group-hover:text-gold-400">
+                {location.name}
+              </h3>
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-2 flex flex-wrap items-center gap-2">
+          <span
+            className={clsx(
+              'rounded-full px-2 py-0.5 text-xs font-medium',
+              primaryBadgeClass
+            )}
+          >
+            {primaryBadge}
+          </span>
+
+          <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs font-medium text-zinc-300">
+            {getCategoryLabel(location)}
+          </span>
+        </div>
+
+        <div className="mb-3 text-xs text-zinc-500">
+          {summaryText}
+        </div>
+
+        {liveData || reportCount > 0 ? (
+          <BusynessBar busyness={location.busyness} />
+        ) : lastReading ? (
+          <div className="mb-2 mt-1">
+            <div className="mb-1 flex justify-between text-xs text-zinc-500">
+              <span>
+                Last seen · {formatDistanceToNow(new Date(lastReading.recorded_at), { addSuffix: true })}
+              </span>
+              <span>{lastReading.busyness}%</span>
+            </div>
+            <BusynessBar busyness={lastReading.busyness} size="sm" />
+          </div>
+        ) : (
+          <div className="mb-2 text-sm text-zinc-500">
+            No live occupancy or recent student reports yet.
+          </div>
+        )}
+
+        {!compact && liveData && subLocations.length > 0 && (
+          <div className="mt-3 space-y-2">
+            {subLocations.map((sub) => {
+              const hasSubCapacity =
+                Number.isFinite(sub.capacity) &&
+                Number.isFinite(sub.count) &&
+                sub.capacity > 0
+
+              return (
+                <div key={sub.name}>
+                  <div className="mb-1 flex justify-between text-xs text-zinc-500">
+                    <span>{sub.name}</span>
+                    <span>
+                      {hasSubCapacity ? `${sub.count}/${sub.capacity}` : `${sub.busyness}% busy`}
+                    </span>
+                  </div>
+                  <BusynessBar busyness={sub.busyness} showLabel={false} size="sm" />
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        <div className="mt-4">
+          <div className="flex items-center justify-center rounded-xl border border-zinc-700 bg-zinc-800/90 px-3 py-2 text-sm font-medium text-zinc-200 transition-colors group-hover:border-gold-500/50 group-hover:text-gold-300">
+            View spot details
+            <span className="ml-2 transition-transform group-hover:translate-x-0.5">→</span>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
