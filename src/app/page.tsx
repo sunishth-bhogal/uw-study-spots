@@ -51,7 +51,7 @@ function getCurrentOccupancy(location: Location) {
     'currentOccupancy',
     'current_occupancy',
     'occupancy',
-    'current'
+    'current',
   ])
 }
 
@@ -61,7 +61,7 @@ function getReportCount(location: Location) {
       'reportCount',
       'report_count',
       'recentReportCount',
-      'recent_report_count'
+      'recent_report_count',
     ]) ?? 0
   )
 }
@@ -232,7 +232,9 @@ export default function Dashboard() {
   }, [allVisibleLocations, search, sort, isFavourite])
 
   const liveDataLocations = useMemo(() => {
-    return allVisibleLocations.filter((location) => isWaitzBacked(location) || hasLiveOccupancyData(location))
+    return allVisibleLocations.filter(
+      (location) => isWaitzBacked(location) || hasLiveOccupancyData(location)
+    )
   }, [allVisibleLocations])
 
   const avgLiveBusyness = useMemo(() => {
@@ -249,24 +251,23 @@ export default function Dashboard() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-zinc-100 mb-1">
+        <h1 className="mb-1 text-3xl font-bold text-zinc-100">
           Find the best <span className="text-gold-500">study spot</span> at UW right now
         </h1>
-        <p className="text-zinc-500 text-sm">
-          Live busyness where available, plus student reports on quietness, seating, and crowd levels across campus.
+        <p className="text-sm text-zinc-500">
+          Live busyness where available, plus student reports on quietness, seating, and crowd
+          levels across campus.
         </p>
       </div>
 
       {!loading && allVisibleLocations.length > 0 && (
         <div className="grid grid-cols-3 gap-3 mb-6">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-center">
-            <div className="text-2xl font-bold text-zinc-100">
-              {allVisibleLocations.length}
-            </div>
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-center">
+            <div className="text-2xl font-bold text-zinc-100">{allVisibleLocations.length}</div>
             <div className="text-xs text-zinc-500">Spots listed</div>
           </div>
 
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-center">
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-center">
             <div
               className={`text-2xl font-bold ${
                 avgLiveBusyness === null
@@ -283,11 +284,49 @@ export default function Dashboard() {
             <div className="text-xs text-zinc-500">Live busyness</div>
           </div>
 
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-center">
-            <div className="text-2xl font-bold text-zinc-100">
-              {reportedLocationsCount}
-            </div>
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-center">
+            <div className="text-2xl font-bold text-zinc-100">{reportedLocationsCount}</div>
             <div className="text-xs text-zinc-500">Student-rated spots</div>
+          </div>
+        </div>
+      )}
+
+      {!loading && allVisibleLocations.length > 0 && (
+        <div className="mb-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold text-zinc-100">How it works</h2>
+            <p className="mt-1 max-w-3xl text-sm text-zinc-500">
+              UW Study Spots combines live occupancy data where available with recent
+              student-submitted reports across campus. Live readings update automatically, while
+              student reports help cover more locations by showing quietness, seating, and crowd
+              levels.
+            </p>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-3">
+            <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4">
+              <div className="mb-1 text-sm font-semibold text-zinc-100">Live occupancy</div>
+              <p className="text-sm text-zinc-500">
+                Spots labeled <span className="text-emerald-400">Waitz live data</span> are using
+                current live occupancy data where available.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4">
+              <div className="mb-1 text-sm font-semibold text-zinc-100">Student reports</div>
+              <p className="text-sm text-zinc-500">
+                Spots labeled <span className="text-blue-300">Student reported</span> use recent
+                community submissions to show quietness, seating, and crowd conditions.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4">
+              <div className="mb-1 text-sm font-semibold text-zinc-100">Freshness matters</div>
+              <p className="text-sm text-zinc-500">
+                Newer readings and reports are more reliable than older ones, so always check the
+                latest update time when comparing spots.
+              </p>
+            </div>
           </div>
         </div>
       )}
@@ -304,19 +343,19 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row">
         <input
           type="text"
           placeholder="Search a building or study spot…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-gold-500 transition-colors"
+          className="flex-1 rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 transition-colors focus:border-gold-500 focus:outline-none"
         />
 
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value as SortOption)}
-          className="bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-zinc-300 focus:outline-none focus:border-gold-500 transition-colors"
+          className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm text-zinc-300 transition-colors focus:border-gold-500 focus:outline-none"
         >
           <option value="waitz">Live data first</option>
           <option value="student-reported">Student insight first</option>
@@ -325,12 +364,12 @@ export default function Dashboard() {
       </div>
 
       {fetchedAt && (
-        <p className="text-xs text-zinc-600 mb-4">
+        <p className="mb-4 text-xs text-zinc-600">
           Updated {formatDistanceToNow(new Date(fetchedAt), { addSuffix: true })}
           {' · '}
           <button
             onClick={fetchOccupancy}
-            className="underline hover:text-zinc-400 transition-colors"
+            className="underline transition-colors hover:text-zinc-400"
           >
             Refresh now
           </button>
@@ -338,28 +377,28 @@ export default function Dashboard() {
       )}
 
       {loading ? (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[...Array(6)].map((_, i) => (
             <div
               key={i}
-              className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 animate-pulse h-48"
+              className="h-48 rounded-2xl border border-zinc-800 bg-zinc-900 p-4 animate-pulse"
             />
           ))}
         </div>
       ) : error ? (
-        <div className="text-center py-16">
-          <p className="text-red-400 text-sm mb-3">{error}</p>
+        <div className="py-16 text-center">
+          <p className="mb-3 text-sm text-red-400">{error}</p>
           <button
             onClick={fetchOccupancy}
-            className="px-4 py-2 bg-zinc-800 rounded-lg text-sm text-zinc-300 hover:bg-zinc-700 transition-colors"
+            className="rounded-lg bg-zinc-800 px-4 py-2 text-sm text-zinc-300 transition-colors hover:bg-zinc-700"
           >
             Try again
           </button>
         </div>
       ) : filtered.length === 0 ? (
-        <p className="text-center text-zinc-600 py-16">No study spots match your search.</p>
+        <p className="py-16 text-center text-zinc-600">No study spots match your search.</p>
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((loc) => (
             <LocationCard
               key={loc.id}
