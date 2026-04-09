@@ -100,6 +100,14 @@ export function OccupancyChart({ locationId }: Props) {
                 dataKey="hour"
                 tick={{ fill: '#71717a', fontSize: 11 }}
                 interval="preserveStartEnd"
+                tickFormatter={(v) => {
+                  const d = new Date(v)
+                  return d.toLocaleTimeString('en-US', {
+                    hour: 'numeric',
+                    hour12: true,
+                    timeZone: 'America/Toronto',
+                  })
+                }}
               />
               <YAxis
                 domain={[0, 100]}
@@ -113,6 +121,17 @@ export function OccupancyChart({ locationId }: Props) {
                   borderRadius: 8,
                 }}
                 labelStyle={{ color: '#d4d4d8' }}
+                labelFormatter={(v) => {
+                  const d = new Date(v)
+                  return d.toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true,
+                    timeZone: 'America/Toronto',
+                  })
+                }}
                 formatter={(v: number) => [`${v}%`, 'Busyness']}
               />
               <Line
