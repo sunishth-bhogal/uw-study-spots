@@ -77,6 +77,36 @@ function shouldExcludeLocation(dbLoc: Pick<DbLocation, 'building_code'>) {
   return EXCLUDED_BUILDING_CODES.has(code)
 }
 
+function parseDateLike(value: string | null | undefined): Date | null {
+  if (!value) return null
+
+  const raw = value.trim()
+  if (!raw) return null
+
+  if (/^\d+$/.test(raw)) {
+    const numericDate = new Date(Number(raw))
+    if (!Number.isNaN(numericDate.getTime())) return numericDate
+  }
+
+  const normalized =
+    raw.includes(' ') && !raw.includes('T') ? raw.replace(' ', 'T') : raw
+
+  const parsed = new Date(normalized)
+  if (!Number.isNaN(parsed.getTime())) return parsed
+
+  return null
+}
+
+function toIsoString(value: string | null | undefined, fallbackIso: string) {
+  const parsed = parseDateLike(value)
+  return parsed ? parsed.toISOString() : fallbackIso
+}
+
+function toNullableIsoString(value: string | null | undefined) {
+  const parsed = parseDateLike(value)
+  return parsed ? parsed.toISOString() : null
+}
+
 function normalizeWaitzMap(waitzLocations: Location[]) {
   const byId = new Map<string, Location>()
   const byName = new Map<string, Location>()
@@ -90,7 +120,12 @@ function normalizeWaitzMap(waitzLocations: Location[]) {
 }
 
 function minutesSince(iso: string, nowIso: string) {
-  const diffMs = new Date(nowIso).getTime() - new Date(iso).getTime()
+  const start = parseDateLike(iso)
+  const end = parseDateLike(nowIso)
+
+  if (!start || !end) return Number.POSITIVE_INFINITY
+
+  const diffMs = end.getTime() - start.getTime()
   return Math.max(0, Math.round(diffMs / 60000))
 }
 
@@ -128,10 +163,11 @@ function normalizeApiLocation(input: {
   category?: string | null
   description?: string | null
 }): ApiLocation {
+  const fallbackIso = new Date().toISOString()
   const count = Math.max(0, Number(input.count ?? 0) || 0)
   const capacity = Math.max(0, Number(input.capacity ?? 0) || 0)
   const reportCount = Math.max(0, Number(input.reportCount ?? 0) || 0)
-  const lastReportedAt = input.lastReportedAt ?? null
+  const lastReportedAt = toNullableIsoString(input.lastReportedAt)
   const buildingCode = input.buildingCode ?? null
   const latitude = input.latitude ?? null
   const longitude = input.longitude ?? null
@@ -146,7 +182,7 @@ function normalizeApiLocation(input: {
     current_occupancy: count,
     capacity,
     isOpen: Boolean(input.isOpen ?? false),
-    lastUpdated: input.lastUpdated ?? new Date().toISOString(),
+    lastUpdated: toIsoString(input.lastUpdated, fallbackIso),
     subLocations: input.subLocations ?? [],
     source: input.source,
     dataSource: input.source,
@@ -173,7 +209,8 @@ function buildCommunityLocation(
   nowIso: string
 ): ApiLocation {
   const reportCount = summary?.report_count ?? 0
-  const lastReportedAt = summary?.last_reported_at ?? latestSeat?.submitted_at ?? null
+  const rawLastReportedAt = summary?.last_reported_at ?? latestSeat?.submitted_at ?? null
+  const lastReportedAt = toNullableIsoString(rawLastReportedAt)
   const confidence = getCommunityConfidence(reportCount, lastReportedAt, nowIso)
 
   const busyness =
@@ -268,7 +305,8 @@ export async function GET() {
       const summary = summaryByLocationId.get(dbLoc.id)
       const latestSeat = latestSeatByLocationId.get(dbLoc.id)
       const reportCount = summary?.report_count ?? 0
-      const lastReportedAt = summary?.last_reported_at ?? latestSeat?.submitted_at ?? null
+      const rawLastReportedAt = summary?.last_reported_at ?? latestSeat?.submitted_at ?? null
+      const lastReportedAt = toNullableIsoString(rawLastReportedAt)
       const confidence = getCommunityConfidence(reportCount, lastReportedAt, fetchedAt)
 
       if (dbLoc.source === 'waitz') {
@@ -327,12 +365,7 @@ export async function GET() {
         })
       }
 
-      return buildCommunityLocation(
-        dbLoc,
-        summary,
-        latestSeat,
-        fetchedAt
-      )
+      return buildCommunityLocation(dbLoc, summary, latestSeat, fetchedAt)
     })
 
     const existingCodes = new Set(

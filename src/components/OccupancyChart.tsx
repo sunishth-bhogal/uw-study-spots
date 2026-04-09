@@ -26,6 +26,26 @@ function formatHourLabel(hour: number) {
   return `${hour - 12} PM`
 }
 
+function parseDateLike(value: unknown): Date | null {
+  if (typeof value !== 'string') return null
+
+  const raw = value.trim()
+  if (!raw) return null
+
+  if (/^\d+$/.test(raw)) {
+    const numericDate = new Date(Number(raw))
+    if (!Number.isNaN(numericDate.getTime())) return numericDate
+  }
+
+  const normalized =
+    raw.includes(' ') && !raw.includes('T') ? raw.replace(' ', 'T') : raw
+
+  const parsed = new Date(normalized)
+  if (!Number.isNaN(parsed.getTime())) return parsed
+
+  return null
+}
+
 export function OccupancyChart({ locationId }: Props) {
   const [history, setHistory] = useState<HistoryPoint[]>([])
   const [typical, setTypical] = useState<TypicalHour[]>([])
@@ -46,6 +66,37 @@ export function OccupancyChart({ locationId }: Props) {
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [locationId])
+
+  const recentChartData = useMemo(() => {
+    return history
+      .map((point, index) => {
+        const parsedDate = parseDateLike(point.time) ?? parseDateLike(point.hour)
+
+        return {
+          ...point,
+          sortKey: parsedDate ? parsedDate.getTime() : index,
+          axisLabel: parsedDate
+            ? parsedDate.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                timeZone: 'America/Toronto',
+              })
+            : point.time || point.hour || `Point ${index + 1}`,
+          tooltipLabel: parsedDate
+            ? parsedDate.toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true,
+                timeZone: 'America/Toronto',
+              })
+            : point.time || point.hour || 'Unknown time',
+          busyness: Number.isFinite(point.busyness) ? point.busyness : 0,
+        }
+      })
+      .sort((a, b) => a.sortKey - b.sortKey)
+  }, [history])
 
   const typicalChartData = useMemo(() => {
     return typical
@@ -88,26 +139,18 @@ export function OccupancyChart({ locationId }: Props) {
       </div>
 
       {tab === 'recent' ? (
-        history.length === 0 ? (
+        recentChartData.length === 0 ? (
           <p className="text-zinc-600 text-sm text-center py-8">
             Not enough data yet — check back after a few hours.
           </p>
         ) : (
           <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={history}>
+            <LineChart data={recentChartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" />
               <XAxis
-                dataKey="hour"
+                dataKey="axisLabel"
                 tick={{ fill: '#71717a', fontSize: 11 }}
                 interval="preserveStartEnd"
-                tickFormatter={(v) => {
-                  const d = new Date(v)
-                  return d.toLocaleTimeString('en-US', {
-                    hour: 'numeric',
-                    hour12: true,
-                    timeZone: 'America/Toronto',
-                  })
-                }}
               />
               <YAxis
                 domain={[0, 100]}
@@ -121,16 +164,9 @@ export function OccupancyChart({ locationId }: Props) {
                   borderRadius: 8,
                 }}
                 labelStyle={{ color: '#d4d4d8' }}
-                labelFormatter={(v) => {
-                  const d = new Date(v)
-                  return d.toLocaleString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    hour: 'numeric',
-                    minute: '2-digit',
-                    hour12: true,
-                    timeZone: 'America/Toronto',
-                  })
+                labelFormatter={(_label, payload) => {
+                  const point = payload?.[0]?.payload
+                  return point?.tooltipLabel ?? ''
                 }}
                 formatter={(v: number) => [`${v}%`, 'Busyness']}
               />
