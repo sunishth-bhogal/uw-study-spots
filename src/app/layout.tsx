@@ -7,9 +7,12 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'UW Study Spots — Live Campus Occupancy',
+  title: 'UW Study Spots',
   description:
     'Real-time occupancy for every study spot on UW campus. See how packed DC Library, Tatham, and more are right now.',
+  icons: {
+    icon: '/uwaterloo-logo.png',
+  },
   openGraph: {
     title: 'UW Study Spots',
     description: 'Real-time occupancy for every study spot on UW campus.',
