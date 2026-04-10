@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { subHours } from 'date-fns'
+import { subDays } from 'date-fns'
 import { supabaseAdmin } from '@/lib/supabase'
 import { fetchWaitzData, slugify } from '@/lib/waitz'
 import { Location } from '@/lib/types'
@@ -138,9 +138,10 @@ function getCommunityConfidence(
 
   const ageMinutes = minutesSince(lastReportedAt, nowIso)
 
-  if (reportCount >= 4 && ageMinutes <= 60) return 'high'
-  if (reportCount >= 2 && ageMinutes <= 120) return 'medium'
-  return 'low'
+  if (reportCount >= 4 && ageMinutes <= 6 * 60) return 'high'
+  if (reportCount >= 2 && ageMinutes <= 24 * 60) return 'medium'
+  if (reportCount >= 1 && ageMinutes <= 24 * 60) return 'low'
+  return 'none'
 }
 
 function normalizeApiLocation(input: {
@@ -242,7 +243,7 @@ function buildCommunityLocation(
 export async function GET() {
   try {
     const fetchedAt = new Date().toISOString()
-    const recentCutoff = subHours(new Date(), 2).toISOString()
+    const recentCutoff = subDays(new Date(), 1).toISOString()
 
     const [dbLocationsRes, waitzLocations, communitySummaryRes, latestSeatsRes] =
       await Promise.all([

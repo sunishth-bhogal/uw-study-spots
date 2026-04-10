@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   MapContainer,
   TileLayer,
@@ -34,17 +34,44 @@ type Props = {
 
 const CAMPUS_CENTER: [number, number] = [43.4710, -80.5430]
 
-function FixMapSize() {
+function SyncMapView({ locations }: { locations: MapLocation[] }) {
   const map = useMap()
 
   useEffect(() => {
     const timer = setTimeout(() => {
       map.invalidateSize()
-      map.setView(CAMPUS_CENTER, 16)
+
+      const validPoints = locations.filter(
+        (loc) =>
+          typeof loc.latitude === 'number' &&
+          typeof loc.longitude === 'number'
+      )
+
+      if (validPoints.length === 0) {
+        map.setView(CAMPUS_CENTER, 16)
+        return
+      }
+
+      if (validPoints.length === 1) {
+        map.setView(
+          [validPoints[0].latitude as number, validPoints[0].longitude as number],
+          17
+        )
+        return
+      }
+
+      const bounds = validPoints.map(
+        (loc) => [loc.latitude as number, loc.longitude as number] as [number, number]
+      )
+
+      map.fitBounds(bounds, {
+        padding: [40, 40],
+        maxZoom: 17,
+      })
     }, 100)
 
     return () => clearTimeout(timer)
-  }, [map])
+  }, [map, locations])
 
   return null
 }
@@ -172,12 +199,27 @@ function getMarkerColor(loc: MapLocation) {
 }
 
 export default function CampusMap({ locations }: Props) {
+  const [mounted, setMounted] = useState(false)
+
   const mapLocations = useMemo(() => dedupeLocations(locations), [locations])
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return (
+      <div className="space-y-3">
+        <div className="relative h-[520px] w-full overflow-hidden rounded-2xl border border-white/10 bg-zinc-900" />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-3">
       <div className="relative h-[520px] w-full overflow-hidden rounded-2xl border border-white/10">
         <MapContainer
+          key="campus-map"
           center={CAMPUS_CENTER}
           zoom={16}
           minZoom={14}
@@ -187,7 +229,7 @@ export default function CampusMap({ locations }: Props) {
           doubleClickZoom={true}
           style={{ height: '100%', width: '100%' }}
         >
-          <FixMapSize />
+          <SyncMapView locations={mapLocations} />
 
           <TileLayer
             attribution="&copy; OpenStreetMap contributors"

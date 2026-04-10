@@ -11,7 +11,7 @@ const CampusMap = dynamic(() => import('@/components/CampusMap'), {
   ssr: false,
 })
 
-type SortOption = 'waitz' | 'student-reported' | 'favourites'
+type SortOption = 'popular' | 'waitz' | 'favourites'
 
 function getNumberValue(location: Location, keys: string[]) {
   for (const key of keys) {
@@ -103,6 +103,19 @@ function hasStudentReportedData(location: Location) {
   )
 }
 
+// Spots that are always shown in Popular regardless of live/reported data
+const PINNED_POPULAR = ['math coffee', 'student life centre', 'engineering 5']
+
+function isPinned(location: Location) {
+  const name = location.name.toLowerCase()
+  return PINNED_POPULAR.some((pin) => name.includes(pin))
+}
+
+// Popular = pinned spots OR has live Waitz data OR has been reported
+function isPopular(location: Location) {
+  return isPinned(location) || isWaitzBacked(location) || hasStudentReportedData(location)
+}
+
 function hasAnyData(location: Location) {
   return isWaitzBacked(location) || hasStudentReportedData(location)
 }
@@ -143,8 +156,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
-  const [sort, setSort] = useState<SortOption>('waitz')
-  const [showEmptySpots, setShowEmptySpots] = useState(false)
+  const [sort, setSort] = useState<SortOption>('popular')
+  const [showHiddenSpots, setShowHiddenSpots] = useState(false)
 
   const { isFavourite, toggle } = useFavorites()
 
@@ -176,72 +189,111 @@ export default function Dashboard() {
     })
   }, [locations])
 
-  const filtered = useMemo(() => {
+  const searchedLocations = useMemo(() => {
     let list = allVisibleLocations
-
     if (search.trim()) {
       const q = search.toLowerCase().trim()
-      list = list.filter((location) => location.name.toLowerCase().includes(q))
+      list = list.filter((location) => {
+        const buildingCode = getStringValue(location, ['building_code', 'buildingCode']) ?? ''
+        return (
+          location.name.toLowerCase().includes(q) ||
+          buildingCode.toLowerCase().includes(q)
+        )
+      })
     }
+    return list
+  }, [allVisibleLocations, search])
 
-    return [...list].sort((a, b) => {
-      if (sort === 'favourites') {
-        const aFav = isFavourite(a.id) ? 0 : 1
-        const bFav = isFavourite(b.id) ? 0 : 1
-        if (aFav !== bFav) return aFav - bFav
-        const aWaitz = isWaitzBacked(a) ? 0 : 1
-        const bWaitz = isWaitzBacked(b) ? 0 : 1
-        if (aWaitz !== bWaitz) return aWaitz - bWaitz
-        const busynessDiff = compareByBusynessDesc(a, b)
-        if (busynessDiff !== 0) return busynessDiff
+  const filtered = useMemo(() => {
+    const list = searchedLocations
+
+    if (sort === 'popular') {
+      // When searching, show ALL matching spots so nothing is hidden behind the popular filter.
+      // When not searching, only show popular spots (live/reported/pinned).
+      const base = search.trim() ? list : list.filter(isPopular)
+      return [...base].sort((a, b) => {
+        // Spots with any actual data come before pinned-but-empty spots
+        const aHasData = isWaitzBacked(a) || hasStudentReportedData(a) ? 0 : 1
+        const bHasData = isWaitzBacked(b) || hasStudentReportedData(b) ? 0 : 1
+        if (aHasData !== bHasData) return aHasData - bHasData
+
+        // Within spots that have data: Waitz live first
+        const aLive = isWaitzBacked(a) ? 0 : 1
+        const bLive = isWaitzBacked(b) ? 0 : 1
+        if (aLive !== bLive) return aLive - bLive
+
+        // Then most recent report
+        const recentDiff = compareByLastReported(a, b)
+        if (recentDiff !== 0) return recentDiff
+
+        // Then most reports
         const reportsDiff = compareByReportsDesc(a, b)
         if (reportsDiff !== 0) return reportsDiff
-        return compareByName(a, b)
-      }
 
-      if (sort === 'waitz') {
-        const aWaitz = isWaitzBacked(a) ? 0 : 1
-        const bWaitz = isWaitzBacked(b) ? 0 : 1
-        if (aWaitz !== bWaitz) return aWaitz - bWaitz
+        // Then busiest
+        const busynessDiff = compareByBusynessDesc(a, b)
+        if (busynessDiff !== 0) return busynessDiff
+
+        return compareByName(a, b)
+      })
+    }
+
+    if (sort === 'waitz') {
+      const waitz = list.filter(isWaitzBacked)
+      return [...waitz].sort((a, b) => {
         const aLive = hasLiveOccupancyData(a) ? 0 : 1
         const bLive = hasLiveOccupancyData(b) ? 0 : 1
         if (aLive !== bLive) return aLive - bLive
+
         const busynessDiff = compareByBusynessDesc(a, b)
         if (busynessDiff !== 0) return busynessDiff
-        const reportsDiff = compareByReportsDesc(a, b)
-        if (reportsDiff !== 0) return reportsDiff
-        return compareByName(a, b)
-      }
 
-      if (sort === 'student-reported') {
-        const aStudent = hasStudentReportedData(a) ? 0 : 1
-        const bStudent = hasStudentReportedData(b) ? 0 : 1
-        if (aStudent !== bStudent) return aStudent - bStudent
-        const reportsDiff = compareByReportsDesc(a, b)
-        if (reportsDiff !== 0) return reportsDiff
+        return compareByName(a, b)
+      })
+    }
+
+    if (sort === 'favourites') {
+      // Only show favourited spots — nothing else
+      const favs = list.filter((l) => isFavourite(l.id))
+      return [...favs].sort((a, b) => {
+        const aLive = isWaitzBacked(a) ? 0 : 1
+        const bLive = isWaitzBacked(b) ? 0 : 1
+        if (aLive !== bLive) return aLive - bLive
+
         const recentDiff = compareByLastReported(a, b)
         if (recentDiff !== 0) return recentDiff
-        const busynessDiff = compareByBusynessDesc(a, b)
-        if (busynessDiff !== 0) return busynessDiff
+
         return compareByName(a, b)
-      }
+      })
+    }
 
-      return compareByName(a, b)
-    })
-  }, [allVisibleLocations, search, sort, isFavourite])
+    return [...list].sort(compareByName)
+  }, [searchedLocations, sort, isFavourite])
 
-  const activeLocations = useMemo(() => filtered.filter(hasAnyData), [filtered])
-  const emptyLocations = useMemo(() => filtered.filter((l) => !hasAnyData(l)), [filtered])
+  // Hidden spots = all locations that didn't make it into filtered (only relevant for popular)
+  const hiddenLocations = useMemo(() => {
+    if (sort !== 'popular') return []
+    const filteredIds = new Set(filtered.map((l) => l.id))
+    return searchedLocations
+      .filter((l) => !filteredIds.has(l.id))
+      .sort(compareByName)
+  }, [sort, filtered, searchedLocations])
 
   const busynessLocations = useMemo(() => {
-    return allVisibleLocations.filter(
-      (location) => hasLiveOccupancyData(location) || hasStudentReportedData(location)
-    )
+    const TWO_HOURS_MS = 2 * 60 * 60 * 1000
+    const now = Date.now()
+    return allVisibleLocations.filter((location) => {
+      // Always include Waitz live data
+      if (hasLiveOccupancyData(location)) return true
+      // Only include self-reported if reported within the last 2 hours
+      const lastReported = getLastReportedAt(location)
+      if (!lastReported) return false
+      return now - new Date(lastReported).getTime() <= TWO_HOURS_MS
+    })
   }, [allVisibleLocations])
-  
+
   const avgLiveBusyness = useMemo(() => {
     if (busynessLocations.length === 0) return null
-  
     const total = busynessLocations.reduce((sum, location) => sum + getBusyness(location), 0)
     return Math.round(total / busynessLocations.length)
   }, [busynessLocations])
@@ -257,16 +309,17 @@ export default function Dashboard() {
           Find the best <span className="text-gold-500">study spot</span> at UW right now
         </h1>
         <p className="text-sm text-zinc-500">
-          Live busyness where available, plus student reports on quietness, seating, and crowd
-          levels across campus.
+          Live and recently-reported spots first. Tap to report any location.
         </p>
       </div>
 
       {!loading && allVisibleLocations.length > 0 && (
-        <div className="grid grid-cols-3 gap-3 mb-6">
+        <div className="mb-6 grid grid-cols-3 gap-3">
           <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-center">
-            <div className="text-2xl font-bold text-zinc-100">{allVisibleLocations.length}</div>
-            <div className="text-xs text-zinc-500">Spots listed</div>
+            <div className="text-2xl font-bold text-zinc-100">{filtered.length}</div>
+            <div className="text-xs text-zinc-500">
+              {sort === 'popular' ? 'Active spots' : sort === 'waitz' ? 'Live spots' : 'Spots'}
+            </div>
           </div>
           <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-center">
             <div
@@ -282,48 +335,11 @@ export default function Dashboard() {
             >
               {avgLiveBusyness === null ? '—' : `${avgLiveBusyness}%`}
             </div>
-            <div className="text-xs text-zinc-500">Live busyness</div>
+            <div className="text-xs text-zinc-500">Average busyness</div>
           </div>
           <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-center">
             <div className="text-2xl font-bold text-zinc-100">{reportedLocationsCount}</div>
-            <div className="text-xs text-zinc-500">Student-rated spots</div>
-          </div>
-        </div>
-      )}
-
-      {!loading && allVisibleLocations.length > 0 && (
-        <div className="mb-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
-          <div className="mb-4">
-            <h2 className="text-lg font-semibold text-zinc-100">How it works</h2>
-            <p className="mt-1 max-w-3xl text-sm text-zinc-500">
-              UW Study Spots combines live occupancy data where available with recent
-              student-submitted reports across campus. Live readings update automatically, while
-              student reports help cover more locations by showing quietness, seating, and crowd
-              levels.
-            </p>
-          </div>
-          <div className="grid gap-3 md:grid-cols-3">
-            <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4">
-              <div className="mb-1 text-sm font-semibold text-zinc-100">Live occupancy</div>
-              <p className="text-sm text-zinc-500">
-                Spots labeled <span className="text-emerald-400">Waitz live data</span> are using
-                current live occupancy data where available.
-              </p>
-            </div>
-            <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4">
-              <div className="mb-1 text-sm font-semibold text-zinc-100">Student reports</div>
-              <p className="text-sm text-zinc-500">
-                Spots labeled <span className="text-blue-300">Student reported</span> use recent
-                community submissions to show quietness, seating, and crowd conditions.
-              </p>
-            </div>
-            <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4">
-              <div className="mb-1 text-sm font-semibold text-zinc-100">Freshness matters</div>
-              <p className="text-sm text-zinc-500">
-                Newer readings and reports are more reliable than older ones, so always check the
-                latest update time when comparing spots.
-              </p>
-            </div>
+            <div className="text-xs text-zinc-500">Reported spots</div>
           </div>
         </div>
       )}
@@ -332,28 +348,37 @@ export default function Dashboard() {
         <div className="mb-6">
           <div className="mb-3">
             <h2 className="text-lg font-semibold text-zinc-100">See it on the map</h2>
-            <p className="text-sm text-zinc-500">Explore every listed study spot across campus.</p>
+            <p className="text-sm text-zinc-500">
+              {sort === 'popular'
+                ? 'Spots with live data or recent reports.'
+                : sort === 'waitz'
+                  ? 'Spots with live Waitz occupancy data.'
+                  : 'Your favourited spots.'}
+            </p>
           </div>
-          <CampusMap locations={filtered} />
+          <CampusMap key={sort} locations={filtered} />
         </div>
       )}
 
       <div className="mb-6 flex flex-col gap-3 sm:flex-row">
         <input
           type="text"
-          placeholder="Search a building or study spot…"
+          placeholder="Search any building or study spot…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="flex-1 rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 transition-colors focus:border-gold-500 focus:outline-none"
         />
         <select
           value={sort}
-          onChange={(e) => setSort(e.target.value as SortOption)}
+          onChange={(e) => {
+            setSort(e.target.value as SortOption)
+            setShowHiddenSpots(false)
+          }}
           className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm text-zinc-300 transition-colors focus:border-gold-500 focus:outline-none"
         >
-          <option value="waitz">Live data first</option>
-          <option value="student-reported">Student insight first</option>
-          <option value="favourites">Favourites first</option>
+          <option value="popular">Popular Spots</option>
+          <option value="waitz">Waitz Live</option>
+          <option value="favourites">Favourites</option>
         </select>
       </div>
 
@@ -375,7 +400,7 @@ export default function Dashboard() {
           {[...Array(6)].map((_, i) => (
             <div
               key={i}
-              className="h-48 rounded-2xl border border-zinc-800 bg-zinc-900 p-4 animate-pulse"
+              className="h-48 animate-pulse rounded-2xl border border-zinc-800 bg-zinc-900 p-4"
             />
           ))}
         </div>
@@ -390,52 +415,57 @@ export default function Dashboard() {
           </button>
         </div>
       ) : filtered.length === 0 ? (
-        <p className="py-16 text-center text-zinc-600">No study spots match your search.</p>
+        <p className="py-16 text-center text-zinc-600">
+          {sort === 'favourites'
+            ? "No favourites yet — heart a spot to save it here."
+            : sort === 'popular'
+              ? 'No active spots right now. Be the first to report one below!'
+              : 'No study spots match your search.'}
+        </p>
       ) : (
         <>
-          {activeLocations.length > 0 && (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {activeLocations.map((loc) => (
-                <LocationCard
-                  key={loc.id}
-                  location={loc}
-                  isFavourite={isFavourite(loc.id)}
-                  onToggleFavourite={toggle}
-                />
-              ))}
-            </div>
-          )}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {filtered.map((loc) => (
+              <LocationCard
+                key={loc.id}
+                location={loc}
+                isFavourite={isFavourite(loc.id)}
+                onToggleFavourite={toggle}
+              />
+            ))}
+          </div>
 
-          {emptyLocations.length > 0 && (
+          {/* Hidden spots toggle */}
+          {hiddenLocations.length > 0 && (
             <div className="mt-8 text-center">
               <button
-                onClick={() => setShowEmptySpots((v) => !v)}
-                className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
+                onClick={() => setShowHiddenSpots((v) => !v)}
+                className="text-sm text-zinc-500 transition-colors hover:text-zinc-300"
               >
-                {showEmptySpots
-                  ? `Hide ${emptyLocations.length} spots with no data yet ▲`
-                  : `+ ${emptyLocations.length} more spots with no data yet ▼`}
+                {showHiddenSpots
+                  ? `Hide ${hiddenLocations.length} other listed spots ▲`
+                  : `+ ${hiddenLocations.length} other listed spots ▼`}
               </button>
 
-              {showEmptySpots && (
-                <div className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-900 divide-y divide-zinc-800 text-left">
-                  {emptyLocations.map((loc) => (
+              {showHiddenSpots && (
+                <div className="mt-4 divide-y divide-zinc-800 rounded-2xl border border-zinc-800 bg-zinc-900 text-left">
+                  {hiddenLocations.map((loc) => (
                     <div
                       key={loc.id}
-                      className="flex items-center justify-between px-4 py-3 hover:bg-zinc-800/50 transition-colors"
+                      className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-zinc-800/50"
                     >
-                      <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex min-w-0 items-center gap-3">
                         <span className="h-2 w-2 flex-shrink-0 rounded-full bg-zinc-600" />
-                        <span className="text-sm text-zinc-300 truncate">{loc.name}</span>
-                        <span className="hidden sm:inline text-xs text-zinc-600 flex-shrink-0">
+                        <span className="truncate text-sm text-zinc-300">{loc.name}</span>
+                        <span className="hidden flex-shrink-0 text-xs text-zinc-600 sm:inline">
                           {getCategoryLabel(loc)}
                         </span>
                       </div>
                       <a
                         href={`/location/${loc.id}`}
-                        className="flex-shrink-0 ml-4 text-xs text-gold-500 hover:text-gold-400 transition-colors whitespace-nowrap"
+                        className="ml-4 flex-shrink-0 whitespace-nowrap text-xs text-gold-500 transition-colors hover:text-gold-400"
                       >
-                        Be the first to report →
+                        Help your Peers!→
                       </a>
                     </div>
                   ))}

@@ -66,20 +66,13 @@ function hasLiveOccupancyData(location: Location) {
 
 function getCategoryLabel(location: Location) {
   const category = getStringValue(location, ['category'])
-
   switch (category) {
-    case 'library':
-      return 'Library'
-    case 'study_space':
-      return 'Study space'
-    case 'quiet_study':
-      return 'Quiet study'
-    case 'casual_space':
-      return 'Casual study'
-    case 'classroom_space':
-      return 'Classroom study'
-    default:
-      return 'Campus building'
+    case 'library': return 'Library'
+    case 'study_space': return 'Study space'
+    case 'quiet_study': return 'Quiet study'
+    case 'casual_space': return 'Casual study'
+    case 'classroom_space': return 'Classroom study'
+    default: return 'Campus building'
   }
 }
 
@@ -101,6 +94,9 @@ export function LocationCard({ location, isFavourite, onToggleFavourite, compact
   const liveData = hasLiveOccupancyData(location)
   const hasStudentReports = reportCount > 0 || Boolean(lastReportedAt)
   const subLocations = Array.isArray(location.subLocations) ? location.subLocations : []
+
+  // Only show quick feedback if there's actual data to confirm or correct
+  const showQuickFeedback = !compact && (liveData || hasStudentReports)
 
   useEffect(() => {
     if (source === 'waitz' && !liveData) {
@@ -129,10 +125,10 @@ export function LocationCard({ location, isFavourite, onToggleFavourite, compact
       ? 'Waitz live data'
       : 'Live data'
     : hasStudentReports
-      ? 'Student reported'
+      ? 'Reported in last 24h'
       : source === 'waitz'
         ? 'No live reading'
-        : 'No reports yet'
+        : 'No reports in last 24h'
 
   const primaryBadgeClass = liveData
     ? 'bg-emerald-400/10 text-emerald-400'
@@ -145,12 +141,12 @@ export function LocationCard({ location, isFavourite, onToggleFavourite, compact
   if (liveData) {
     summaryText = `~${currentOccupancy} / ${capacity} people`
   } else if (reportCount > 0 && lastReportedAt) {
-    summaryText = `${reportCount} recent report${reportCount === 1 ? '' : 's'} · last ${formatDistanceToNow(
+    summaryText = `${reportCount} report${reportCount === 1 ? '' : 's'} in last 24h · last ${formatDistanceToNow(
       new Date(lastReportedAt),
       { addSuffix: true }
     )}`
   } else if (reportCount > 0) {
-    summaryText = `${reportCount} recent report${reportCount === 1 ? '' : 's'}`
+    summaryText = `${reportCount} report${reportCount === 1 ? '' : 's'} in last 24h`
   } else if (lastReading) {
     summaryText = `Last live reading ${formatDistanceToNow(new Date(lastReading.recorded_at), {
       addSuffix: true,
@@ -164,20 +160,27 @@ export function LocationCard({ location, isFavourite, onToggleFavourite, compact
         isFavourite && 'border-gold-500/40'
       )}
     >
+      {/* Full-card link underneath everything */}
       <Link
         href={`/location/${location.id}`}
         aria-label={`View details for ${location.name}`}
         className="absolute inset-0 z-0"
       />
 
+      {/* Favourite button — interactive, above the link */}
       <button
-        onClick={() => onToggleFavourite(location.id)}
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          onToggleFavourite(location.id)
+        }}
         aria-label={isFavourite ? 'Remove from favourites' : 'Add to favourites'}
         className="relative z-20 ml-auto block text-lg leading-none transition-transform hover:scale-110"
       >
         {isFavourite ? '⭐' : '☆'}
       </button>
 
+      {/* Card content — pointer-events-none so clicks fall through to the link */}
       <div className="relative z-10 -mt-6 pointer-events-none">
         <div className="mb-3 flex items-start justify-between gap-3">
           <div className="min-w-0">
@@ -191,15 +194,9 @@ export function LocationCard({ location, isFavourite, onToggleFavourite, compact
         </div>
 
         <div className="mb-2 flex flex-wrap items-center gap-2">
-          <span
-            className={clsx(
-              'rounded-full px-2 py-0.5 text-xs font-medium',
-              primaryBadgeClass
-            )}
-          >
+          <span className={clsx('rounded-full px-2 py-0.5 text-xs font-medium', primaryBadgeClass)}>
             {primaryBadge}
           </span>
-
           <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs font-medium text-zinc-300">
             {getCategoryLabel(location)}
           </span>
@@ -223,10 +220,11 @@ export function LocationCard({ location, isFavourite, onToggleFavourite, compact
           </div>
         ) : (
           <div className="mb-2 text-sm text-zinc-500">
-            No live occupancy or recent student reports yet.
+            No live occupancy or reports in the last 24 hours.
           </div>
         )}
 
+        {/* Sub-locations for Waitz spots */}
         {!compact && liveData && subLocations.length > 0 && (
           <div className="mt-3 space-y-2">
             {subLocations.map((sub) => {
@@ -234,7 +232,6 @@ export function LocationCard({ location, isFavourite, onToggleFavourite, compact
                 Number.isFinite(sub.capacity) &&
                 Number.isFinite(sub.count) &&
                 sub.capacity > 0
-
               return (
                 <div key={sub.name}>
                   <div className="mb-1 flex justify-between text-xs text-zinc-500">
@@ -257,6 +254,25 @@ export function LocationCard({ location, isFavourite, onToggleFavourite, compact
           </div>
         </div>
       </div>
+
+      {/* Quick feedback — pointer-events-auto so it's interactive, above link */}
+      {showQuickFeedback && (
+        <div
+          className="relative z-20 mt-4 rounded-xl border border-zinc-800 bg-zinc-950/60 p-3 pointer-events-auto"
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+          }}
+        >
+          <div className="mb-2">
+            <p className="text-sm font-medium text-zinc-100">Quick feedback</p>
+            <p className="text-xs text-zinc-500">
+              {liveData ? 'Does this live reading feel right?' : 'How busy is it right now?'}
+            </p>
+          </div>
+          <VibeCheck locationId={location.id} />
+        </div>
+      )}
     </div>
   )
 }
