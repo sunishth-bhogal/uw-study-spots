@@ -1,6 +1,0 @@
-{
-  "/page": "app/page.js",
-  "/api/reports/vibe/route": "app/api/reports/vibe/route.js",
-  "/api/occupancy/route": "app/api/occupancy/route.js",
-  "/location/[id]/page": "app/location/[id]/page.js"
-}
