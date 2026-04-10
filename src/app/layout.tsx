@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import 'leaflet/dist/leaflet.css'
 import './globals.css'
 import { ThemeProvider } from '@/components/ThemeProvider'
@@ -67,6 +68,7 @@ export default function RootLayout({
           </footer>
 
           <Analytics />
+          <SpeedInsights/>
         </ThemeProvider>
       </body>
     </html>
