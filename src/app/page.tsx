@@ -356,7 +356,7 @@ export default function Dashboard() {
       <div className="mb-6 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5">
         <h2 className="mb-2 text-base font-semibold text-zinc-100">How it works</h2>
         <p className="mb-4 text-sm text-zinc-500">
-          UW Study Spots combines live occupancy data where available with recent student-submitted reports across campus. Live readings update automatically, while student reports help cover more locations by showing quietness, seating, and crowd levels.
+          UW Study Spots combines live occupancy data where available with recent student-submitted reports across campus. Live readings update automatically, while student reports help cover more locations by showing quietness, seating, and crowd levels. Keep reporting and helping your peers and build a streak!
         </p>
         <div className="grid gap-3 sm:grid-cols-3">
           <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
@@ -495,7 +495,7 @@ export default function Dashboard() {
                         href={`/location/${loc.id}`}
                         className="ml-4 flex-shrink-0 whitespace-nowrap text-xs text-gold-500 transition-colors hover:text-gold-400"
                       >
-                        Be the first to report →
+                        Help your peers.→
                       </a>
                     </div>
                   ))}
