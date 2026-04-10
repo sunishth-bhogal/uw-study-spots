@@ -6,6 +6,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { Location } from '@/lib/types'
 import { LocationCard } from '@/components/LocationCard'
 import { useFavorites } from '@/hooks/useFavorites'
+import { useStreak } from '@/hooks/useStreak'
 
 const CampusMap = dynamic(() => import('@/components/CampusMap'), {
   ssr: false,
@@ -160,6 +161,7 @@ export default function Dashboard() {
   const [showHiddenSpots, setShowHiddenSpots] = useState(false)
 
   const { isFavourite, toggle } = useFavorites()
+  const { streak } = useStreak()
 
   const fetchOccupancy = async () => {
     try {
@@ -309,12 +311,12 @@ export default function Dashboard() {
           Find the best <span className="text-gold-500">study spot</span> at UW right now
         </h1>
         <p className="text-sm text-zinc-500">
-          Live and recently-reported spots first. Tap to report any location.
+          Live busyness where available, plus student reports on quietness, seating, and crowd levels across campus.
         </p>
       </div>
 
       {!loading && allVisibleLocations.length > 0 && (
-        <div className="mb-6 grid grid-cols-3 gap-3">
+        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-center">
             <div className="text-2xl font-bold text-zinc-100">{filtered.length}</div>
             <div className="text-xs text-zinc-500">
@@ -335,28 +337,56 @@ export default function Dashboard() {
             >
               {avgLiveBusyness === null ? '—' : `${avgLiveBusyness}%`}
             </div>
-            <div className="text-xs text-zinc-500">Average busyness</div>
+            <div className="text-xs text-zinc-500">Avg busyness</div>
           </div>
           <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-center">
             <div className="text-2xl font-bold text-zinc-100">{reportedLocationsCount}</div>
             <div className="text-xs text-zinc-500">Reported spots</div>
           </div>
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-center">
+            <div className="text-2xl font-bold text-gold-400">
+              {streak.current > 0 ? `${streak.current}🔥` : '—'}
+            </div>
+            <div className="text-xs text-zinc-500">Your streak</div>
+          </div>
         </div>
       )}
+
+      {/* How it works */}
+      <div className="mb-6 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5">
+        <h2 className="mb-2 text-base font-semibold text-zinc-100">How it works</h2>
+        <p className="mb-4 text-sm text-zinc-500">
+          UW Study Spots combines live occupancy data where available with recent student-submitted reports across campus. Live readings update automatically, while student reports help cover more locations by showing quietness, seating, and crowd levels.
+        </p>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
+            <div className="mb-1 text-sm font-semibold text-zinc-100">Live occupancy</div>
+            <div className="text-xs text-zinc-500">
+              Spots labeled <span className="font-semibold text-emerald-400">Waitz live data</span> are using current live occupancy data where available.
+            </div>
+          </div>
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
+            <div className="mb-1 text-sm font-semibold text-zinc-100">Student reports</div>
+            <div className="text-xs text-zinc-500">
+              Spots labeled <span className="font-semibold text-blue-400">Student reported</span> use recent community submissions to show quietness, seating, and crowd conditions.
+            </div>
+          </div>
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
+            <div className="mb-1 text-sm font-semibold text-zinc-100">Freshness matters</div>
+            <div className="text-xs text-zinc-500">
+              Newer readings and reports are more reliable than older ones, so always check the latest update time when comparing spots.
+            </div>
+          </div>
+        </div>
+      </div>
 
       {!loading && !error && filtered.length > 0 && (
         <div className="mb-6">
           <div className="mb-3">
             <h2 className="text-lg font-semibold text-zinc-100">See it on the map</h2>
-            <p className="text-sm text-zinc-500">
-              {sort === 'popular'
-                ? 'Spots with live data or recent reports.'
-                : sort === 'waitz'
-                  ? 'Spots with live Waitz occupancy data.'
-                  : 'Your favourited spots.'}
-            </p>
+            <p className="text-sm text-zinc-500">Explore every listed study spot across campus.</p>
           </div>
-          <CampusMap key={sort} locations={filtered} />
+          <CampusMap locations={allVisibleLocations} />
         </div>
       )}
 
@@ -465,7 +495,7 @@ export default function Dashboard() {
                         href={`/location/${loc.id}`}
                         className="ml-4 flex-shrink-0 whitespace-nowrap text-xs text-gold-500 transition-colors hover:text-gold-400"
                       >
-                        Help your Peers!→
+                        Be the first to report →
                       </a>
                     </div>
                   ))}
