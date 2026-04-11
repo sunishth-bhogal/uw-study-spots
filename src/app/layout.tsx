@@ -36,12 +36,12 @@ export default function RootLayout({
           <nav className="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-md">
             <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
               <a href="/" className="flex shrink-0 items-center gap-3">
-                <div className="relative h-9 w-9">
+                <div className="relative h-14 w-14 overflow-hidden">
                   <Image
                     src="/studyspots.png"
-                    alt="University of Waterloo logo"
+                    alt="UW Study Spots logo"
                     fill
-                    className="object-contain"
+                    className="object-contain scale-150"
                     priority
                   />
                 </div>
@@ -49,12 +49,11 @@ export default function RootLayout({
                   UW <span className="text-gold-500">Study Spots</span>
                 </span>
               </a>
-
-              <div className="flex items-center gap-3">
-                <span className="hidden text-xs text-zinc-500 sm:inline">
-                  Updated every 10 min
-                </span>
-                <ThemeToggle />
+            <div className="flex items-center gap-3">
+              <span className="hidden text-xs text-zinc-500 sm:inline">
+                Updated every 10 min
+              </span>
+              <ThemeToggle />
               </div>
             </div>
           </nav>
