@@ -38,7 +38,7 @@ export default function RootLayout({
               <a href="/" className="flex shrink-0 items-center gap-3">
                 <div className="relative h-14 w-14 overflow-hidden">
                   <Image
-                    src="/studyspots.png"
+                    src="/lightmode.png"
                     alt="UW Study Spots logo"
                     fill
                     className="object-contain scale-150"
