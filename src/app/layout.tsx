@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   description:
     'Real-time occupancy for every study spot on UW campus. See how packed DC Library, Tatham, and more are right now.',
   icons: {
-    icon: '/lightmode.png',
+    icon: '/uwaterloo-logo.png',
   },
   openGraph: {
     title: 'UW Study Spots',
@@ -33,7 +33,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} min-h-screen bg-zinc-950 text-zinc-100`}>
         <ThemeProvider>
-          <nav className="sticky top-0 z-50 border-b border-zinc-800 bg-white/80 backdrop-blur-md dark:bg-zinc-950/80">
+        <nav className="sticky top-0 z-50 border-b border-zinc-200 bg-white/80 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/80">
             <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-4">
               <a href="/" className="flex shrink-0 items-center gap-2">
                 <div className="relative h-16 w-16 overflow-hidden">
