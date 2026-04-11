@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   description:
     'Real-time occupancy for every study spot on UW campus. See how packed DC Library, Tatham, and more are right now.',
   icons: {
-    icon: '/uw-study-spot-logo.png',
+    icon: '/uw-study-spot-logo.jpg',
   },
   openGraph: {
     title: 'UW Study Spots',
@@ -38,7 +38,7 @@ export default function RootLayout({
               <a href="/" className="flex shrink-0 items-center gap-3">
                 <div className="relative h-9 w-9">
                   <Image
-                    src="/uw-study-spot-logo.png"
+                    src="/uw-study-spot-logo.jpg"
                     alt="University of Waterloo logo"
                     fill
                     className="object-contain"
