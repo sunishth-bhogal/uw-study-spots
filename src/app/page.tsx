@@ -6,7 +6,6 @@ import { formatDistanceToNow } from 'date-fns'
 import { Location } from '@/lib/types'
 import { LocationCard } from '@/components/LocationCard'
 import { useFavorites } from '@/hooks/useFavorites'
-import { useStreak } from '@/hooks/useStreak'
 
 const CampusMap = dynamic(() => import('@/components/CampusMap'), {
   ssr: false,
@@ -104,7 +103,6 @@ function hasStudentReportedData(location: Location) {
   )
 }
 
-// Spots that are always shown in Popular regardless of live/reported data
 const PINNED_POPULAR = ['math coffee', 'student life centre', 'engineering 5']
 
 function isPinned(location: Location) {
@@ -112,13 +110,8 @@ function isPinned(location: Location) {
   return PINNED_POPULAR.some((pin) => name.includes(pin))
 }
 
-// Popular = pinned spots OR has live Waitz data OR has been reported
 function isPopular(location: Location) {
   return isPinned(location) || isWaitzBacked(location) || hasStudentReportedData(location)
-}
-
-function hasAnyData(location: Location) {
-  return isWaitzBacked(location) || hasStudentReportedData(location)
 }
 
 function compareByName(a: Location, b: Location) {
@@ -142,18 +135,26 @@ function compareByLastReported(a: Location, b: Location) {
 function getCategoryLabel(location: Location) {
   const category = getStringValue(location, ['category'])
   switch (category) {
-    case 'library': return 'Library'
-    case 'study_space': return 'Study space'
-    case 'quiet_study': return 'Quiet study'
-    case 'casual_space': return 'Casual study'
-    case 'classroom_space': return 'Classroom study'
-    default: return 'Campus building'
+    case 'library':
+      return 'Library'
+    case 'study_space':
+      return 'Study space'
+    case 'quiet_study':
+      return 'Quiet study'
+    case 'casual_space':
+      return 'Casual study'
+    case 'classroom_space':
+      return 'Classroom study'
+    default:
+      return 'Campus building'
   }
 }
 
 export default function Dashboard() {
   const [locations, setLocations] = useState<Location[]>([])
   const [fetchedAt, setFetchedAt] = useState<string | null>(null)
+  const [totalReportsToDate, setTotalReportsToDate] = useState(0)
+  const [visitorCount, setVisitorCount] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
@@ -161,15 +162,50 @@ export default function Dashboard() {
   const [showHiddenSpots, setShowHiddenSpots] = useState(false)
 
   const { isFavourite, toggle } = useFavorites()
-  const { streak } = useStreak()
+
+  const getVisitorId = () => {
+    if (typeof window === 'undefined') return null
+
+    let visitorId = localStorage.getItem('uwss_visitor_id')
+
+    if (!visitorId) {
+      visitorId = crypto.randomUUID()
+      localStorage.setItem('uwss_visitor_id', visitorId)
+    }
+
+    return visitorId
+  }
+
+  const registerVisitor = async () => {
+    try {
+      const visitorId = getVisitorId()
+      if (!visitorId) return
+
+      await fetch('/api/visitors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ visitorId }),
+      })
+
+      const res = await fetch('/api/visitors', { cache: 'no-store' })
+      if (!res.ok) return
+
+      const data = await res.json()
+      setVisitorCount(data.visitorCount ?? 0)
+    } catch {
+      // fail silently
+    }
+  }
 
   const fetchOccupancy = async () => {
     try {
       const res = await fetch('/api/occupancy')
       if (!res.ok) throw new Error('Failed to fetch')
+
       const data = await res.json()
       setLocations(data.locations ?? [])
       setFetchedAt(data.fetchedAt ?? null)
+      setTotalReportsToDate(data.totalReportsToDate ?? 0)
       setError(null)
     } catch {
       setError('Could not load study spots. Try refreshing.')
@@ -180,6 +216,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchOccupancy()
+    registerVisitor()
+
     const interval = setInterval(fetchOccupancy, 5 * 60 * 1000)
     return () => clearInterval(interval)
   }, [])
@@ -193,6 +231,7 @@ export default function Dashboard() {
 
   const searchedLocations = useMemo(() => {
     let list = allVisibleLocations
+
     if (search.trim()) {
       const q = search.toLowerCase().trim()
       list = list.filter((location) => {
@@ -203,6 +242,7 @@ export default function Dashboard() {
         )
       })
     }
+
     return list
   }, [allVisibleLocations, search])
 
@@ -210,29 +250,22 @@ export default function Dashboard() {
     const list = searchedLocations
 
     if (sort === 'popular') {
-      // When searching, show ALL matching spots so nothing is hidden behind the popular filter.
-      // When not searching, only show popular spots (live/reported/pinned).
       const base = search.trim() ? list : list.filter(isPopular)
       return [...base].sort((a, b) => {
-        // Spots with any actual data come before pinned-but-empty spots
         const aHasData = isWaitzBacked(a) || hasStudentReportedData(a) ? 0 : 1
         const bHasData = isWaitzBacked(b) || hasStudentReportedData(b) ? 0 : 1
         if (aHasData !== bHasData) return aHasData - bHasData
 
-        // Within spots that have data: Waitz live first
         const aLive = isWaitzBacked(a) ? 0 : 1
         const bLive = isWaitzBacked(b) ? 0 : 1
         if (aLive !== bLive) return aLive - bLive
 
-        // Then most recent report
         const recentDiff = compareByLastReported(a, b)
         if (recentDiff !== 0) return recentDiff
 
-        // Then most reports
         const reportsDiff = compareByReportsDesc(a, b)
         if (reportsDiff !== 0) return reportsDiff
 
-        // Then busiest
         const busynessDiff = compareByBusynessDesc(a, b)
         if (busynessDiff !== 0) return busynessDiff
 
@@ -255,7 +288,6 @@ export default function Dashboard() {
     }
 
     if (sort === 'favourites') {
-      // Only show favourited spots — nothing else
       const favs = list.filter((l) => isFavourite(l.id))
       return [...favs].sort((a, b) => {
         const aLive = isWaitzBacked(a) ? 0 : 1
@@ -270,11 +302,11 @@ export default function Dashboard() {
     }
 
     return [...list].sort(compareByName)
-  }, [searchedLocations, sort, isFavourite])
+  }, [searchedLocations, sort, isFavourite, search])
 
-  // Hidden spots = all locations that didn't make it into filtered (only relevant for popular)
   const hiddenLocations = useMemo(() => {
     if (sort !== 'popular') return []
+
     const filteredIds = new Set(filtered.map((l) => l.id))
     return searchedLocations
       .filter((l) => !filteredIds.has(l.id))
@@ -284,25 +316,23 @@ export default function Dashboard() {
   const busynessLocations = useMemo(() => {
     const TWO_HOURS_MS = 2 * 60 * 60 * 1000
     const now = Date.now()
+
     return allVisibleLocations.filter((location) => {
-      // Always include Waitz live data
       if (hasLiveOccupancyData(location)) return true
-      // Only include self-reported if reported within the last 2 hours
+
       const lastReported = getLastReportedAt(location)
       if (!lastReported) return false
+
       return now - new Date(lastReported).getTime() <= TWO_HOURS_MS
     })
   }, [allVisibleLocations])
 
   const avgLiveBusyness = useMemo(() => {
     if (busynessLocations.length === 0) return null
+
     const total = busynessLocations.reduce((sum, location) => sum + getBusyness(location), 0)
     return Math.round(total / busynessLocations.length)
   }, [busynessLocations])
-
-  const reportedLocationsCount = useMemo(() => {
-    return allVisibleLocations.filter((location) => hasStudentReportedData(location)).length
-  }, [allVisibleLocations])
 
   return (
     <div>
@@ -311,7 +341,8 @@ export default function Dashboard() {
           Find the best <span className="text-gold-500">study spot</span> at UW right now
         </h1>
         <p className="text-sm text-zinc-500">
-          Live busyness where available, plus student reports on quietness, seating, and crowd levels across campus.
+          Live busyness where available, plus student reports on quietness, seating, and crowd
+          levels across campus.
         </p>
       </div>
 
@@ -323,6 +354,7 @@ export default function Dashboard() {
               {sort === 'popular' ? 'Active spots' : sort === 'waitz' ? 'Live spots' : 'Spots'}
             </div>
           </div>
+
           <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-center">
             <div
               className={`text-2xl font-bold ${
@@ -339,42 +371,52 @@ export default function Dashboard() {
             </div>
             <div className="text-xs text-zinc-500">Avg busyness</div>
           </div>
+
           <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-center">
-            <div className="text-2xl font-bold text-zinc-100">{reportedLocationsCount}</div>
-            <div className="text-xs text-zinc-500">Reported spots</div>
+            <div className="text-2xl font-bold text-zinc-100">{totalReportsToDate}+</div>
+            <div className="text-xs text-zinc-500">Reports to date</div>
           </div>
+
           <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-center">
             <div className="text-2xl font-bold text-gold-400">
-              {streak.current > 0 ? `${streak.current}🔥` : '—'}
+              {visitorCount === null ? '—' : `${visitorCount}+`}
             </div>
-            <div className="text-xs text-zinc-500">Your streak</div>
+            <div className="text-xs text-zinc-500">Students helped to date</div>
           </div>
         </div>
       )}
 
-      {/* How it works */}
       <div className="mb-6 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5">
         <h2 className="mb-2 text-base font-semibold text-zinc-100">How it works</h2>
         <p className="mb-4 text-sm text-zinc-500">
-          UW Study Spots combines live occupancy data where available with recent student-submitted reports across campus. Live readings update automatically, while student reports help cover more locations by showing quietness, seating, and crowd levels. Keep reporting and helping your peers and build a streak!
+          UW Study Spots combines live occupancy data where available with recent
+          student-submitted reports across campus. Live readings update automatically, while
+          student reports help cover more locations by showing quietness, seating, and crowd
+          levels. Keep reporting and helping your peers.
         </p>
+
         <div className="grid gap-3 sm:grid-cols-3">
           <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
             <div className="mb-1 text-sm font-semibold text-zinc-100">Live occupancy</div>
             <div className="text-xs text-zinc-500">
-              Spots labeled <span className="font-semibold text-emerald-400">Waitz live data</span> are using current live occupancy data where available.
+              Spots labeled <span className="font-semibold text-emerald-400">Waitz live data</span>{' '}
+              are using current live occupancy data where available.
             </div>
           </div>
+
           <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
             <div className="mb-1 text-sm font-semibold text-zinc-100">Student reports</div>
             <div className="text-xs text-zinc-500">
-              Spots labeled <span className="font-semibold text-blue-400">Student reported</span> use recent community submissions to show quietness, seating, and crowd conditions.
+              Spots labeled <span className="font-semibold text-blue-400">Student reported</span>{' '}
+              use recent community submissions to show quietness, seating, and crowd conditions.
             </div>
           </div>
+
           <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
             <div className="mb-1 text-sm font-semibold text-zinc-100">Freshness matters</div>
             <div className="text-xs text-zinc-500">
-              Newer readings and reports are more reliable than older ones, so always check the latest update time when comparing spots.
+              Newer readings and reports are more reliable than older ones, so always check the
+              latest update time when comparing spots.
             </div>
           </div>
         </div>
@@ -398,6 +440,7 @@ export default function Dashboard() {
           onChange={(e) => setSearch(e.target.value)}
           className="flex-1 rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 transition-colors focus:border-gold-500 focus:outline-none"
         />
+
         <select
           value={sort}
           onChange={(e) => {
@@ -447,7 +490,7 @@ export default function Dashboard() {
       ) : filtered.length === 0 ? (
         <p className="py-16 text-center text-zinc-600">
           {sort === 'favourites'
-            ? "No favourites yet — heart a spot to save it here."
+            ? 'No favourites yet — heart a spot to save it here.'
             : sort === 'popular'
               ? 'No active spots right now. Be the first to report one below!'
               : 'No study spots match your search.'}
@@ -465,7 +508,6 @@ export default function Dashboard() {
             ))}
           </div>
 
-          {/* Hidden spots toggle */}
           {hiddenLocations.length > 0 && (
             <div className="mt-8 text-center">
               <button
@@ -491,6 +533,7 @@ export default function Dashboard() {
                           {getCategoryLabel(loc)}
                         </span>
                       </div>
+
                       <a
                         href={`/location/${loc.id}`}
                         className="ml-4 flex-shrink-0 whitespace-nowrap text-xs text-gold-500 transition-colors hover:text-gold-400"

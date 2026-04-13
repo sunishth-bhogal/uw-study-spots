@@ -245,31 +245,40 @@ export async function GET() {
     const fetchedAt = new Date().toISOString()
     const recentCutoff = subDays(new Date(), 1).toISOString()
 
-    const [dbLocationsRes, waitzLocations, communitySummaryRes, latestSeatsRes] =
-      await Promise.all([
-        supabaseAdmin
-          .from('locations')
-          .select(
-            'id, name, building_code, category, source, waitz_name, description, campus, is_active'
-          )
-          .eq('is_active', true)
-          .order('name', { ascending: true }),
+    const [
+      dbLocationsRes,
+      waitzLocations,
+      communitySummaryRes,
+      latestSeatsRes,
+      totalReportsRes,
+    ] = await Promise.all([
+      supabaseAdmin
+        .from('locations')
+        .select(
+          'id, name, building_code, category, source, waitz_name, description, campus, is_active'
+        )
+        .eq('is_active', true)
+        .order('name', { ascending: true }),
 
-        fetchWaitzData().catch((err) => {
-          console.error('Waitz fetch failed:', err)
-          return [] as Location[]
-        }),
+      fetchWaitzData().catch((err) => {
+        console.error('Waitz fetch failed:', err)
+        return [] as Location[]
+      }),
 
-        supabaseAdmin
-          .from('recent_user_report_summary')
-          .select('*'),
+      supabaseAdmin
+        .from('recent_user_report_summary')
+        .select('*'),
 
-        supabaseAdmin
-          .from('seat_reports')
-          .select('location_id, seats_available, submitted_at')
-          .gte('submitted_at', recentCutoff)
-          .order('submitted_at', { ascending: false }),
-      ])
+      supabaseAdmin
+        .from('seat_reports')
+        .select('location_id, seats_available, submitted_at')
+        .gte('submitted_at', recentCutoff)
+        .order('submitted_at', { ascending: false }),
+
+      supabaseAdmin
+        .from('user_reports')
+        .select('*', { count: 'exact', head: true }),
+    ])
 
     if (dbLocationsRes.error) {
       throw new Error(`Failed to load locations: ${dbLocationsRes.error.message}`)
@@ -282,6 +291,12 @@ export async function GET() {
     if (latestSeatsRes.error) {
       throw new Error(`Failed to load seat reports: ${latestSeatsRes.error.message}`)
     }
+
+    if (totalReportsRes.error) {
+      throw new Error(`Failed to load total reports: ${totalReportsRes.error.message}`)
+    }
+
+    const totalReportsToDate = totalReportsRes.count ?? 0
 
     const dbLocations = (dbLocationsRes.data ?? []) as DbLocation[]
     const visibleDbLocations = dbLocations.filter((dbLoc) => !shouldExcludeLocation(dbLoc))
@@ -418,6 +433,7 @@ export async function GET() {
       {
         locations,
         fetchedAt,
+        totalReportsToDate,
       },
       {
         headers: {
