@@ -298,6 +298,19 @@ insert into locations (
     -80.540058
   ),
   (
+    'engineering-7',
+    'Engineering 7 (E7)',
+    'E7',
+    'study_space',
+    'community',
+    null,
+    'Pearl Sullivan Engineering building with study spaces and lounges',
+    'waterloo',
+    true,
+    43.472868,
+    -80.539522
+  ),
+  (
     'environment-3',
     'Environment 3',
     'EV3',
@@ -612,6 +625,7 @@ where id in (
   'science-teaching-complex',
   'quantum-nano-centre',
   'engineering-5',
+  'engineering-7',
   'environment-3',
   'environment-1',
   'davis-centre-cafeteria',
@@ -637,81 +651,101 @@ where id in (
 
 -- =========================
 -- 6) backfill coordinates by building code
+-- (verified coordinates from map tool used for E5, E7, SLC, MC)
 -- =========================
 update locations
 set
   latitude = case upper(building_code)
-    when 'LIB' then 43.469694
-    when 'DC' then 43.472434
-    when 'EV1' then 43.468361
-    when 'EV2' then 43.468263
-    when 'EV3' then 43.467996
-    when 'MC' then 43.472121
-    when 'M3' then 43.473189
-    when 'ESC' then 43.471371
-    when 'SLC' then 43.471617
-    when 'STC' then 43.470568
-    when 'CPH' then 43.470942
-    when 'DWE' then 43.470081
-    when 'E2' then 43.470822
-    when 'E3' then 43.470807
-    when 'E5' then 43.472862
-    when 'E6' then 43.473006
-    when 'RCH' then 43.470280
-    when 'QNC' then 43.471360
-    when 'PHY' then 43.470849
-    when 'B1' then 43.470816
-    when 'B2' then 43.470807
-    when 'C2' then 43.472627
-    when 'PAS' then 43.467152
-    when 'HH' then 43.468036
-    when 'AL' then 43.468891
-    when 'ML' then 43.468931
+    when 'LIB'  then 43.469694
+    when 'DC'   then 43.472434
+    when 'EV1'  then 43.468361
+    when 'EV2'  then 43.468263
+    when 'EV3'  then 43.467996
+    when 'MC'   then 43.472121
+    when 'M3'   then 43.473189
+    when 'ESC'  then 43.471371
+    when 'SLC'  then 43.471617
+    when 'STC'  then 43.470568
+    when 'CPH'  then 43.470942
+    when 'DWE'  then 43.470081
+    when 'E2'   then 43.470822
+    when 'E3'   then 43.470807
+    when 'E5'   then 43.472862
+    when 'E6'   then 43.473006
+    when 'E7'   then 43.472868
+    when 'RCH'  then 43.470280
+    when 'QNC'  then 43.471360
+    when 'PHY'  then 43.470849
+    when 'B1'   then 43.470816
+    when 'B2'   then 43.470807
+    when 'C2'   then 43.472627
+    when 'PAS'  then 43.467152
+    when 'HH'   then 43.468036
+    when 'AL'   then 43.468891
+    when 'ML'   then 43.468931
     when 'HLTH' then 43.473564
-    when 'OPT' then 43.475882
-    when 'RUC' then 43.469004
-    when 'UTD' then 43.468704
+    when 'OPT'  then 43.475882
+    when 'RUC'  then 43.469004
+    when 'UTD'  then 43.468704
     else latitude
   end,
   longitude = case upper(building_code)
-    when 'LIB' then -80.542298
-    when 'DC' then -80.542005
-    when 'EV1' then -80.542342
-    when 'EV2' then -80.542704
-    when 'EV3' then -80.543254
-    when 'MC' then -80.543933
-    when 'M3' then -80.544075
-    when 'ESC' then -80.542753
-    when 'SLC' then -80.545281
-    when 'STC' then -80.543466
-    when 'CPH' then -80.539248
-    when 'DWE' then -80.539708
-    when 'E2' then -80.540483
-    when 'E3' then -80.543704
-    when 'E5' then -80.540058
-    when 'E6' then -80.538707
-    when 'RCH' then -80.540718
-    when 'QNC' then -80.544322
-    when 'PHY' then -80.541556
-    when 'B1' then -80.543716
-    when 'B2' then -80.543704
-    when 'C2' then -80.542973
-    when 'PAS' then -80.542283
-    when 'HH' then -80.541740
-    when 'AL' then -80.541783
-    when 'ML' then -80.542738
+    when 'LIB'  then -80.542298
+    when 'DC'   then -80.542005
+    when 'EV1'  then -80.542342
+    when 'EV2'  then -80.542704
+    when 'EV3'  then -80.543254
+    when 'MC'   then -80.543933
+    when 'M3'   then -80.544075
+    when 'ESC'  then -80.542753
+    when 'SLC'  then -80.545281
+    when 'STC'  then -80.543466
+    when 'CPH'  then -80.539248
+    when 'DWE'  then -80.539708
+    when 'E2'   then -80.540483
+    when 'E3'   then -80.543704
+    when 'E5'   then -80.540058
+    when 'E6'   then -80.538707
+    when 'E7'   then -80.539522
+    when 'RCH'  then -80.540718
+    when 'QNC'  then -80.544322
+    when 'PHY'  then -80.541556
+    when 'B1'   then -80.543716
+    when 'B2'   then -80.543704
+    when 'C2'   then -80.542973
+    when 'PAS'  then -80.542283
+    when 'HH'   then -80.541740
+    when 'AL'   then -80.541783
+    when 'ML'   then -80.542738
     when 'HLTH' then -80.546250
-    when 'OPT' then -80.545504
-    when 'RUC' then -80.547260
-    when 'UTD' then -80.545892
+    when 'OPT'  then -80.545504
+    when 'RUC'  then -80.547260
+    when 'UTD'  then -80.545892
     else longitude
   end,
   updated_at = now()
 where building_code is not null;
 
+-- =========================
+-- 7) fix any mismatched Davis Library occupancy readings
+-- =========================
 update occupancy_readings
 set
   location_id = 'davis-library',
   location_name = 'Davis Library'
 where lower(location_name) = 'davis library'
   and location_id <> 'davis-library';
+
+
+create or replace view recent_user_report_summary as
+select
+  location_id,
+  round(avg(crowdedness))::int       as avg_crowdedness,
+  round(avg(seats_available))::int   as avg_seats_available,
+  round(avg(quietness))::int         as avg_quietness,
+  bool_or(coalesce(is_open, false))  as any_open_report,
+  count(*)::int                      as report_count,
+  max(submitted_at)                  as last_reported_at
+from user_reports
+where submitted_at >= now() - interval '24 hours'
+group by location_id;

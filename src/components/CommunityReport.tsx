@@ -31,7 +31,7 @@ interface CommunityReportRow {
 }
 
 const crowdednessOptions = [
-  { label: 'Quiet',    value: 20 },
+  { label: 'Empty',    value: 20 },
   { label: 'Moderate', value: 45 },
   { label: 'Busy',     value: 70 },
   { label: 'Packed',   value: 90 },

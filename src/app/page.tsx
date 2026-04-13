@@ -495,7 +495,7 @@ export default function Dashboard() {
                         href={`/location/${loc.id}`}
                         className="ml-4 flex-shrink-0 whitespace-nowrap text-xs text-gold-500 transition-colors hover:text-gold-400"
                       >
-                        Help your peers.→
+                        Help your peers→
                       </a>
                     </div>
                   ))}
