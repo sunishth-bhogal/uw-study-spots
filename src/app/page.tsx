@@ -336,94 +336,142 @@ export default function Dashboard() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="mb-1 text-3xl font-bold text-zinc-100">
-          Find the best <span className="text-gold-500">study spot</span> at UW right now
-        </h1>
-        <p className="text-sm text-zinc-500">
-          Live busyness where available, plus student reports on quietness, seating, and crowd
-          levels across campus.
-        </p>
-      </div>
+      <section className="mb-8 rounded-3xl border border-zinc-800 bg-zinc-900/60 p-6 sm:p-8 lg:p-10">
+        <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-start">
+          <div>
+            <div className="flex flex-wrap gap-2 mb-4">
+              <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-gold-500/15 text-gold-400">
+                Live where available
+              </span>
+              <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-zinc-900 text-zinc-300">
+                Student-reported
+              </span>
+              <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-zinc-900 text-zinc-300">
+                Built for UW
+              </span>
+            </div>
 
-      {!loading && allVisibleLocations.length > 0 && (
-        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-center">
-            <div className="text-2xl font-bold text-zinc-100">{filtered.length}</div>
-            <div className="text-xs text-zinc-500">
-              {sort === 'popular' ? 'Active spots' : sort === 'waitz' ? 'Live spots' : 'Spots'}
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-zinc-100 leading-[1.05] max-w-4xl">
+              Find a good study spot
+              <span className="text-gold-500"> before </span>
+              you waste the walk.
+            </h1>
+
+            <p className="mt-4 text-base sm:text-lg text-zinc-400 leading-7 max-w-2xl">
+              See live busyness where available, plus student reports on quietness, seating,
+              and crowd levels across campus.
+            </p>
+
+            <div className="mt-6 flex flex-wrap gap-3">
+              <a
+                href="#study-spots"
+                className="inline-flex items-center justify-center rounded-xl bg-gold-500 px-5 py-3 text-sm font-semibold text-zinc-900 hover:opacity-90 transition-opacity"
+              >
+                Find a spot now
+              </a>
+
+              <a
+                href="#map"
+                className="inline-flex items-center justify-center rounded-xl bg-zinc-900 px-5 py-3 text-sm font-medium text-zinc-200 hover:bg-zinc-800 transition-colors"
+              >
+                Open campus map
+              </a>
+            </div>
+
+            <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4">
+                <div className="text-2xl font-bold text-zinc-100">
+                  {loading ? '—' : allVisibleLocations.length}
+                </div>
+                <div className="text-xs text-zinc-500 mt-1">Active spots</div>
+              </div>
+
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4">
+                <div
+                  className={`text-2xl font-bold ${
+                    avgLiveBusyness === null
+                      ? 'text-zinc-300'
+                      : avgLiveBusyness < 40
+                        ? 'text-emerald-400'
+                        : avgLiveBusyness < 70
+                          ? 'text-yellow-400'
+                          : 'text-red-400'
+                  }`}
+                >
+                  {avgLiveBusyness === null ? '—' : `${avgLiveBusyness}%`}
+                </div>
+                <div className="text-xs text-zinc-500 mt-1">Avg busyness</div>
+              </div>
+
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4">
+                <div className="text-2xl font-bold text-zinc-100">
+                  {loading ? '—' : `${totalReportsToDate}+`}
+                </div>
+                <div className="text-xs text-zinc-500 mt-1">Reports to date</div>
+              </div>
+
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4">
+                <div className="text-2xl font-bold text-gold-400">
+                  {visitorCount === null ? '—' : `${visitorCount}+`}
+                </div>
+                <div className="text-xs text-zinc-500 mt-1">Students helped</div>
+              </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-center">
-            <div
-              className={`text-2xl font-bold ${
-                avgLiveBusyness === null
-                  ? 'text-zinc-300'
-                  : avgLiveBusyness < 40
-                    ? 'text-emerald-400'
-                    : avgLiveBusyness < 70
-                      ? 'text-yellow-400'
-                      : 'text-red-400'
-              }`}
-            >
-              {avgLiveBusyness === null ? '—' : `${avgLiveBusyness}%`}
+          <div className="rounded-3xl border border-zinc-800 bg-zinc-950/60 p-5 sm:p-6">
+            <div className="flex items-center justify-between gap-3 mb-5">
+              <div>
+                <p className="text-lg font-semibold text-zinc-100">How it works</p>
+                <p className="text-sm text-zinc-500">Fast enough to check between classes.</p>
+              </div>
+              <div className="h-10 w-10 rounded-2xl bg-gold-500/15 flex items-center justify-center text-gold-400">
+                📍
+              </div>
             </div>
-            <div className="text-xs text-zinc-500">Avg busyness</div>
-          </div>
 
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-center">
-            <div className="text-2xl font-bold text-zinc-100">{totalReportsToDate}+</div>
-            <div className="text-xs text-zinc-500">Reports to date</div>
-          </div>
+            <div className="space-y-3">
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4">
+                <p className="text-sm font-semibold text-zinc-100">1. Check the latest vibe</p>
+                <p className="text-sm text-zinc-500 mt-1">
+                  Use live occupancy where available or recent student reports when it is not.
+                </p>
+              </div>
 
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-center">
-            <div className="text-2xl font-bold text-gold-400">
-              {visitorCount === null ? '—' : `${visitorCount}+`}
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4">
+                <p className="text-sm font-semibold text-zinc-100">2. Compare before walking</p>
+                <p className="text-sm text-zinc-500 mt-1">
+                  Look at crowd levels, quietness, seating, and freshness of the update.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4">
+                <p className="text-sm font-semibold text-zinc-100">3. Leave a quick report</p>
+                <p className="text-sm text-zinc-500 mt-1">
+                  Takes a few seconds and saves the next person from a pointless side quest.
+                </p>
+              </div>
             </div>
-            <div className="text-xs text-zinc-500">Students helped to date</div>
+
+            <div className="mt-5 rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4">
+              <p className="text-xs uppercase tracking-wide text-zinc-500 mb-2">Freshness matters</p>
+              <p className="text-sm text-zinc-300 leading-6">
+                Newer readings and reports are more reliable, so always check the latest update
+                time before committing to the walk.
+              </p>
+            </div>
+
+            {fetchedAt && (
+              <p className="mt-4 text-xs text-zinc-500">
+                Updated {formatDistanceToNow(new Date(fetchedAt), { addSuffix: true })}
+              </p>
+            )}
           </div>
         </div>
-      )}
+      </section>
 
-      <div className="mb-6 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5">
-        <h2 className="mb-2 text-base font-semibold text-zinc-100">How it works</h2>
-        <p className="mb-4 text-sm text-zinc-500">
-          UW Study Spots combines live occupancy data where available with recent
-          student-submitted reports across campus. Live readings update automatically, while
-          student reports help cover more locations by showing quietness, seating, and crowd
-          levels. Keep reporting and helping your peers.
-        </p>
-
-        <div className="grid gap-3 sm:grid-cols-3">
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
-            <div className="mb-1 text-sm font-semibold text-zinc-100">Live occupancy</div>
-            <div className="text-xs text-zinc-500">
-              Spots labeled <span className="font-semibold text-emerald-400">Waitz live data</span>{' '}
-              are using current live occupancy data where available.
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
-            <div className="mb-1 text-sm font-semibold text-zinc-100">Student reports</div>
-            <div className="text-xs text-zinc-500">
-              Spots labeled <span className="font-semibold text-blue-400">Student reported</span>{' '}
-              use recent community submissions to show quietness, seating, and crowd conditions.
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
-            <div className="mb-1 text-sm font-semibold text-zinc-100">Freshness matters</div>
-            <div className="text-xs text-zinc-500">
-              Newer readings and reports are more reliable than older ones, so always check the
-              latest update time when comparing spots.
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {!loading && !error && filtered.length > 0 && (
-        <div className="mb-6">
+      {!loading && !error && allVisibleLocations.length > 0 && (
+        <div id="map" className="mb-6 scroll-mt-24">
           <div className="mb-3">
             <h2 className="text-lg font-semibold text-zinc-100">See it on the map</h2>
             <p className="text-sm text-zinc-500">Explore every listed study spot across campus.</p>
@@ -432,122 +480,124 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row">
-        <input
-          type="text"
-          placeholder="Search any building or study spot…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 transition-colors focus:border-gold-500 focus:outline-none"
-        />
+      <div id="study-spots" className="scroll-mt-24">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row">
+          <input
+            type="text"
+            placeholder="Search any building or study spot…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="flex-1 rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 transition-colors focus:border-gold-500 focus:outline-none"
+          />
 
-        <select
-          value={sort}
-          onChange={(e) => {
-            setSort(e.target.value as SortOption)
-            setShowHiddenSpots(false)
-          }}
-          className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm text-zinc-300 transition-colors focus:border-gold-500 focus:outline-none"
-        >
-          <option value="popular">Popular Spots</option>
-          <option value="waitz">Waitz Live</option>
-          <option value="favourites">Favourites</option>
-        </select>
-      </div>
-
-      {fetchedAt && (
-        <p className="mb-4 text-xs text-zinc-600">
-          Updated {formatDistanceToNow(new Date(fetchedAt), { addSuffix: true })}
-          {' · '}
-          <button
-            onClick={fetchOccupancy}
-            className="underline transition-colors hover:text-zinc-400"
+          <select
+            value={sort}
+            onChange={(e) => {
+              setSort(e.target.value as SortOption)
+              setShowHiddenSpots(false)
+            }}
+            className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm text-zinc-300 transition-colors focus:border-gold-500 focus:outline-none"
           >
-            Refresh now
-          </button>
-        </p>
-      )}
+            <option value="popular">Popular Spots</option>
+            <option value="waitz">Waitz Live</option>
+            <option value="favourites">Favourites</option>
+          </select>
+        </div>
 
-      {loading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {[...Array(6)].map((_, i) => (
-            <div
-              key={i}
-              className="h-48 animate-pulse rounded-2xl border border-zinc-800 bg-zinc-900 p-4"
-            />
-          ))}
-        </div>
-      ) : error ? (
-        <div className="py-16 text-center">
-          <p className="mb-3 text-sm text-red-400">{error}</p>
-          <button
-            onClick={fetchOccupancy}
-            className="rounded-lg bg-zinc-800 px-4 py-2 text-sm text-zinc-300 transition-colors hover:bg-zinc-700"
-          >
-            Try again
-          </button>
-        </div>
-      ) : filtered.length === 0 ? (
-        <p className="py-16 text-center text-zinc-600">
-          {sort === 'favourites'
-            ? 'No favourites yet — heart a spot to save it here.'
-            : sort === 'popular'
-              ? 'No active spots right now. Be the first to report one below!'
-              : 'No study spots match your search.'}
-        </p>
-      ) : (
-        <>
+        {fetchedAt && (
+          <p className="mb-4 text-xs text-zinc-600">
+            Updated {formatDistanceToNow(new Date(fetchedAt), { addSuffix: true })}
+            {' · '}
+            <button
+              onClick={fetchOccupancy}
+              className="underline transition-colors hover:text-zinc-400"
+            >
+              Refresh now
+            </button>
+          </p>
+        )}
+
+        {loading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((loc) => (
-              <LocationCard
-                key={loc.id}
-                location={loc}
-                isFavourite={isFavourite(loc.id)}
-                onToggleFavourite={toggle}
+            {[...Array(6)].map((_, i) => (
+              <div
+                key={i}
+                className="h-48 animate-pulse rounded-2xl border border-zinc-800 bg-zinc-900 p-4"
               />
             ))}
           </div>
-
-          {hiddenLocations.length > 0 && (
-            <div className="mt-8 text-center">
-              <button
-                onClick={() => setShowHiddenSpots((v) => !v)}
-                className="text-sm text-zinc-500 transition-colors hover:text-zinc-300"
-              >
-                {showHiddenSpots
-                  ? `Hide ${hiddenLocations.length} other listed spots ▲`
-                  : `+ ${hiddenLocations.length} other listed spots ▼`}
-              </button>
-
-              {showHiddenSpots && (
-                <div className="mt-4 divide-y divide-zinc-800 rounded-2xl border border-zinc-800 bg-zinc-900 text-left">
-                  {hiddenLocations.map((loc) => (
-                    <div
-                      key={loc.id}
-                      className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-zinc-800/50"
-                    >
-                      <div className="flex min-w-0 items-center gap-3">
-                        <span className="h-2 w-2 flex-shrink-0 rounded-full bg-zinc-600" />
-                        <span className="truncate text-sm text-zinc-300">{loc.name}</span>
-                        <span className="hidden flex-shrink-0 text-xs text-zinc-600 sm:inline">
-                          {getCategoryLabel(loc)}
-                        </span>
-                      </div>
-
-                      <a
-                        href={`/location/${loc.id}`}
-                        className="ml-4 flex-shrink-0 whitespace-nowrap text-xs text-gold-500 transition-colors hover:text-gold-400"
-                      >
-                        Help your peers→
-                      </a>
-                    </div>
-                  ))}
-                </div>
-              )}
+        ) : error ? (
+          <div className="py-16 text-center">
+            <p className="mb-3 text-sm text-red-400">{error}</p>
+            <button
+              onClick={fetchOccupancy}
+              className="rounded-lg bg-zinc-800 px-4 py-2 text-sm text-zinc-300 transition-colors hover:bg-zinc-700"
+            >
+              Try again
+            </button>
+          </div>
+        ) : filtered.length === 0 ? (
+          <p className="py-16 text-center text-zinc-600">
+            {sort === 'favourites'
+              ? 'No favourites yet — heart a spot to save it here.'
+              : sort === 'popular'
+                ? 'No active spots right now. Be the first to report one below!'
+                : 'No study spots match your search.'}
+          </p>
+        ) : (
+          <>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {filtered.map((loc) => (
+                <LocationCard
+                  key={loc.id}
+                  location={loc}
+                  isFavourite={isFavourite(loc.id)}
+                  onToggleFavourite={toggle}
+                />
+              ))}
             </div>
-          )}
-        </>
-      )}
+
+            {hiddenLocations.length > 0 && (
+              <div className="mt-8 text-center">
+                <button
+                  onClick={() => setShowHiddenSpots((v) => !v)}
+                  className="text-sm text-zinc-500 transition-colors hover:text-zinc-300"
+                >
+                  {showHiddenSpots
+                    ? `Hide ${hiddenLocations.length} other listed spots ▲`
+                    : `+ ${hiddenLocations.length} other listed spots ▼`}
+                </button>
+
+                {showHiddenSpots && (
+                  <div className="mt-4 divide-y divide-zinc-800 rounded-2xl border border-zinc-800 bg-zinc-900 text-left">
+                    {hiddenLocations.map((loc) => (
+                      <div
+                        key={loc.id}
+                        className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-zinc-800/50"
+                      >
+                        <div className="flex min-w-0 items-center gap-3">
+                          <span className="h-2 w-2 flex-shrink-0 rounded-full bg-zinc-600" />
+                          <span className="truncate text-sm text-zinc-300">{loc.name}</span>
+                          <span className="hidden flex-shrink-0 text-xs text-zinc-600 sm:inline">
+                            {getCategoryLabel(loc)}
+                          </span>
+                        </div>
+
+                        <a
+                          href={`/location/${loc.id}`}
+                          className="ml-4 flex-shrink-0 whitespace-nowrap text-xs text-gold-500 transition-colors hover:text-gold-400"
+                        >
+                          Help your peers→
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   )
 }
