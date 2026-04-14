@@ -263,14 +263,15 @@ export default function LocationDetailPage({ params }: PageProps) {
               </h1>
 
               <p className="text-lg text-zinc-200 mb-2">
-                Well now that we know you have a good sense of humour this is <span className="font-semibold text-zinc-100">UW Study Spots</span> for{' '}
+                Well now that we know you have a good sense of humour this is{' '}
+                <span className="font-semibold text-zinc-100">UW Study Spots</span> for{' '}
                 <span className="font-semibold text-zinc-100">{location.name}</span>.
               </p>
 
               <p className="text-sm text-zinc-400 leading-6 max-w-2xl">
                 This website allows you to see the crowdedness of every building on campus.
-                With your response other students know if the walk is worth it. Takes two seconds to help the next 
-                person and makes your scan kind of heroic.
+                With your response other students know if the walk is worth it. Takes two seconds
+                to help the next person and makes your scan kind of heroic.
               </p>
 
               <div className="mt-5 flex flex-wrap gap-3">
@@ -295,13 +296,13 @@ export default function LocationDetailPage({ params }: PageProps) {
                 Your scan has a purpose.
               </p>
 
-              <div className="mt-5 max-w-md overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950/50">
+              <div className="mt-5 max-w-md overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950/50 p-2">
                 <Image
                   src="/Drake.png"
-                  alt="Side-eye monkey meme"
+                  alt="Drake reaction meme"
                   width={500}
                   height={500}
-                  className="h-40 sm:h-44 w-full object-cover"
+                  className="w-full h-auto max-h-[260px] object-contain object-center rounded-xl"
                   priority
                 />
               </div>
