@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { formatDistanceToNow } from 'date-fns'
@@ -224,6 +225,7 @@ export default function LocationDetailPage({ params }: PageProps) {
   }
 
   const subLocations = Array.isArray(location.subLocations) ? location.subLocations : []
+  const instagramUrl = 'https://instagram.com/uwstudyspots'
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -234,6 +236,104 @@ export default function LocationDetailPage({ params }: PageProps) {
         >
           ← Back to all study spots
         </Link>
+      </div>
+
+      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
+        <div className="grid gap-6 lg:grid-cols-[1.6fr_0.95fr] lg:items-start">
+          <div>
+            <div className="flex flex-wrap gap-2 mb-4">
+              <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-gold-500/15 text-gold-400">
+                New here?
+              </span>
+              <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-zinc-800 text-zinc-300">
+                Student-built
+              </span>
+              <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-zinc-800 text-zinc-300">
+                Anonymous reports
+              </span>
+            </div>
+
+            <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 mb-3">
+            Yeah the poster bait worked.
+            </h2>
+
+            <p className="text-base text-zinc-200 mb-2">
+              Well this is <span className="font-semibold text-zinc-100">UW Study Spots</span> for{' '}
+              <span className="font-semibold text-zinc-100">{location.name}</span>.
+            </p>
+
+            <p className="text-sm text-zinc-400 leading-6 max-w-2xl">
+            So why are you here? You can report the crowdedness of where you are in a quick anonymous report so the next student has a better shot than pure guesswork only to try the next spot.
+            As a community we can help each other. Takes two seconds to help the next person and makes your accidental scan kind of heroic.
+            </p>
+
+            <div className="mt-5 flex flex-wrap gap-3">
+              <a
+                href="#student-report"
+                className="inline-flex items-center justify-center rounded-xl bg-gold-500 px-4 py-2.5 text-sm font-semibold text-zinc-900 hover:opacity-90 transition-opacity"
+              >
+                Leave anonymous report
+              </a>
+              <a
+                href={instagramUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center rounded-xl bg-zinc-800 px-4 py-2.5 text-sm font-medium text-zinc-200 hover:bg-zinc-700 transition-colors"
+              >
+                Follow @uwstudyspots
+              </a>
+            </div>
+
+            <div className="mt-5 max-w-md overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950/50">
+              <Image
+                src="/side-eye-monkey.png"
+                alt="Side-eye monkey meme"
+                width={500}
+                height={500}
+                className="h-48 w-full object-cover"
+                priority
+              />
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/50 p-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gold-500/15 text-2xl">
+                🦉
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-zinc-100">Better than guessing</p>
+                <p className="text-xs text-zinc-500">Lowkey saves wasted walks across campus.</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
+                <p className="text-lg mb-1">📍</p>
+                <p className="text-xs font-medium text-zinc-200">This spot</p>
+                <p className="text-xs text-zinc-500 mt-1">{location.name}</p>
+              </div>
+
+              <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
+                <p className="text-lg mb-1">🙈</p>
+                <p className="text-xs font-medium text-zinc-200">Anonymous</p>
+                <p className="text-xs text-zinc-500 mt-1">No name needed</p>
+              </div>
+
+              <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
+                <p className="text-lg mb-1">🚶</p>
+                <p className="text-xs font-medium text-zinc-200">Check first</p>
+                <p className="text-xs text-zinc-500 mt-1">Before walking there</p>
+              </div>
+
+              <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
+                <p className="text-lg mb-1">🤝</p>
+                <p className="text-xs font-medium text-zinc-200">Student-powered</p>
+                <p className="text-xs text-zinc-500 mt-1">Built on community</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
@@ -320,42 +420,30 @@ export default function LocationDetailPage({ params }: PageProps) {
         )}
       </div>
 
+      <div id="student-report" className="mb-6 scroll-mt-24">
+        <CommunityReport locationId={location.id} locationName={location.name} />
+      </div>
+
+      {detailState.liveData && (
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
+          <h2 className="text-lg font-semibold text-zinc-100 mb-2">Quick feedback</h2>
+          <p className="text-sm text-zinc-500 mb-4">
+            Fast reaction to whether this live reading feels right.
+          </p>
+          <VibeCheck locationId={location.id} />
+        </div>
+      )}
+
       <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
         <h2 className="text-lg font-semibold text-zinc-100 mb-2">Occupancy & report history</h2>
         <p className="text-sm text-zinc-500 mb-4">
-          Historical data is strongest for locations with live readings or recent student reports.
+          Useful if you want the bigger picture after checking the current vibe.
         </p>
         <OccupancyChart locationId={location.id} />
       </div>
 
-      {detailState.liveData ? (
-        <>
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
-            <h2 className="text-lg font-semibold text-zinc-100 mb-2">Quick feedback</h2>
-            <p className="text-sm text-zinc-500 mb-4">
-              Fast reaction to whether this live reading feels right.
-            </p>
-            <VibeCheck locationId={location.id} />
-          </div>
-
-          <details className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
-            <summary className="cursor-pointer text-lg font-semibold text-zinc-100">
-              Add a detailed student report
-            </summary>
-            <p className="text-sm text-zinc-500 mt-2 mb-4">
-              Share extra detail like seats, quietness, access, outlets, and notes.
-            </p>
-            <CommunityReport locationId={location.id} />
-          </details>
-        </>
-      ) : (
-        <div className="mb-6">
-          <CommunityReport locationId={location.id} />
-        </div>
-      )}
-
       {subLocations.length > 0 && detailState.liveData && (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
           <h2 className="text-lg font-semibold text-zinc-100 mb-4">Floor breakdown</h2>
           <div className="space-y-4">
             {subLocations.map((sub) => {
@@ -398,6 +486,36 @@ export default function LocationDetailPage({ params }: PageProps) {
           </div>
         </div>
       )}
+
+      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="max-w-2xl">
+            <h2 className="text-lg font-semibold text-zinc-100 mb-2">Help us build this out further</h2>
+            <p className="text-sm text-zinc-400 leading-6">
+              This only gets better if students keep helping students. Every anonymous report makes
+              UW Study Spots more useful, and we are trying to expand coverage across more buildings
+              and study spaces on campus.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            <a
+              href={instagramUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center justify-center rounded-xl bg-gold-500 px-4 py-2.5 text-sm font-semibold text-zinc-900 hover:opacity-90 transition-opacity"
+            >
+              Follow @uwstudyspots
+            </a>
+            <Link
+              href="/"
+              className="inline-flex items-center justify-center rounded-xl bg-zinc-800 px-4 py-2.5 text-sm font-medium text-zinc-200 hover:bg-zinc-700 transition-colors"
+            >
+              Explore all study spots
+            </Link>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

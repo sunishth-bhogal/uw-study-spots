@@ -5,6 +5,7 @@ import clsx from 'clsx'
 
 interface Props {
   locationId: string
+  locationName?: string
 }
 
 interface CommunitySummary {
@@ -31,10 +32,10 @@ interface CommunityReportRow {
 }
 
 const crowdednessOptions = [
-  { label: 'Empty',    value: 20 },
+  { label: 'Empty', value: 20 },
   { label: 'Moderate', value: 45 },
-  { label: 'Busy',     value: 70 },
-  { label: 'Packed',   value: 90 },
+  { label: 'Busy', value: 70 },
+  { label: 'Packed', value: 90 },
 ]
 
 const quietnessOptions = [1, 2, 3, 4, 5]
@@ -51,19 +52,20 @@ function minutesRemaining(untilIso: string | null) {
   return Math.max(0, Math.ceil(diffMs / 60000))
 }
 
-export function CommunityReport({ locationId }: Props) {
-  const [summary, setSummary]   = useState<CommunitySummary | null>(null)
-  const [reports, setReports]   = useState<CommunityReportRow[]>([])
-  const [loading, setLoading]   = useState(true)
+export function CommunityReport({ locationId, locationName }: Props) {
+  const [summary, setSummary] = useState<CommunitySummary | null>(null)
+  const [reports, setReports] = useState<CommunityReportRow[]>([])
+  const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
-  const [submitted, setSubmitted]   = useState(false)
-  const [error, setError]       = useState<string | null>(null)
+  const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [cooldownUntil, setCooldownUntil] = useState<string | null>(null)
 
-  // Form fields — seats + isOpen removed
-  const [crowdedness,  setCrowdedness]  = useState<number | null>(null)
-  const [quietness,    setQuietness]    = useState<number | null>(null)
-  const [note,         setNote]         = useState('')
+  const [crowdedness, setCrowdedness] = useState<number | null>(null)
+  const [quietness, setQuietness] = useState<number | null>(null)
+  const [note, setNote] = useState('')
+
+  const displayName = locationName ?? 'this study spot'
 
   const loadData = async () => {
     try {
@@ -81,13 +83,18 @@ export function CommunityReport({ locationId }: Props) {
     }
   }
 
-  useEffect(() => { loadData() }, [locationId])
+  useEffect(() => {
+    loadData()
+  }, [locationId])
 
   useEffect(() => {
     const key = getCooldownKey(locationId)
     const stored = window.localStorage.getItem(key)
 
-    if (!stored) { setCooldownUntil(null); return }
+    if (!stored) {
+      setCooldownUntil(null)
+      return
+    }
 
     const remaining = minutesRemaining(stored)
     if (remaining <= 0) {
@@ -123,6 +130,7 @@ export function CommunityReport({ locationId }: Props) {
 
   const submit = async () => {
     if (submitting || isLocked) return
+
     try {
       setSubmitting(true)
       setSubmitted(false)
@@ -163,51 +171,70 @@ export function CommunityReport({ locationId }: Props) {
 
   return (
     <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4 mb-5">
-        <div>
-          <h2 className="text-lg font-semibold text-zinc-100">Student reports</h2>
-          <p className="text-sm text-zinc-500">
-            Community-submitted info for this location. This is not official building-hours data.
-          </p>
+      <div className="flex flex-col gap-4 mb-6">
+        <div className="flex flex-wrap gap-2">
+          <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-gold-500/15 text-gold-400">
+            Anonymous
+          </span>
+          <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-zinc-800 text-zinc-300">
+            Takes a few seconds
+          </span>
+          <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-zinc-800 text-zinc-300">
+            Helps other students
+          </span>
         </div>
-        {summary && (
-          <div className="text-right text-xs text-zinc-500 shrink-0">
-            <div>{summary.report_count} recent reports</div>
-            {summary.last_reported_at && (
-              <div>
-                Last report:{' '}
-                {new Date(summary.last_reported_at).toLocaleTimeString([], {
-                  hour: 'numeric',
-                  minute: '2-digit',
-                })}
-              </div>
-            )}
+
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div className="max-w-2xl">
+            <h2 className="text-xl font-semibold text-zinc-100 mb-2">
+              Help the next student out
+            </h2>
+            <p className="text-sm text-zinc-400 leading-6">
+              This report is completely anonymous. No name, no login, just a quick way to tell
+              people what <span className="text-zinc-200 font-medium">{displayName}</span> looks
+              like right now before they start walking there.
+            </p>
+            <p className="text-sm text-zinc-500 leading-6 mt-2">
+              UW Study Spots only gets better if students keep helping students, so every report
+              makes this page more useful for everyone else.
+            </p>
           </div>
-        )}
+
+          {summary && (
+            <div className="text-left sm:text-right text-xs text-zinc-500 shrink-0">
+              <div>{summary.report_count} recent reports</div>
+              {summary.last_reported_at && (
+                <div>
+                  Last report:{' '}
+                  {new Date(summary.last_reported_at).toLocaleTimeString([], {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Summary stats — just crowdedness + quietness */}
       {summary && (
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
           <div className="bg-zinc-950/60 border border-zinc-800 rounded-xl p-3">
             <div className="text-lg font-bold text-zinc-100">
               {summary.avg_crowdedness != null ? `${summary.avg_crowdedness}%` : '—'}
             </div>
-            <div className="text-xs text-zinc-500">Avg crowdedness</div>
+            <div className="text-xs text-zinc-500">Avg crowdedness from recent reports</div>
           </div>
           <div className="bg-zinc-950/60 border border-zinc-800 rounded-xl p-3">
             <div className="text-lg font-bold text-zinc-100">
               {summary.avg_quietness != null ? `${summary.avg_quietness} / 5` : '—'}
             </div>
-            <div className="text-xs text-zinc-500">Avg quietness</div>
+            <div className="text-xs text-zinc-500">Avg quietness from recent reports</div>
           </div>
         </div>
       )}
 
-      {/* Form */}
       <div className="space-y-5">
-        {/* Crowdedness */}
         <div>
           <p className="text-sm font-medium text-zinc-300 mb-2">How crowded was it?</p>
           <div className="flex flex-wrap gap-2">
@@ -231,7 +258,6 @@ export function CommunityReport({ locationId }: Props) {
           </div>
         </div>
 
-        {/* Quietness */}
         <div>
           <p className="text-sm font-medium text-zinc-300 mb-2">How quiet was it?</p>
           <div className="flex gap-2">
@@ -256,7 +282,6 @@ export function CommunityReport({ locationId }: Props) {
           <p className="text-xs text-zinc-500 mt-1.5">1 = noisy · 5 = very quiet</p>
         </div>
 
-        {/* Note */}
         <div>
           <label className="block text-sm font-medium text-zinc-300 mb-2">
             Note <span className="text-zinc-500 font-normal">(optional)</span>
@@ -265,32 +290,42 @@ export function CommunityReport({ locationId }: Props) {
             value={note}
             onChange={(e) => setNote(e.target.value)}
             disabled={isLocked}
-            placeholder="e.g. noisy near the entrance, 3rd floor is quiet"
+            placeholder="e.g. packed near the entrance, upstairs is quieter"
             maxLength={300}
             className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-gold-500 disabled:opacity-60"
           />
+          <p className="text-xs text-zinc-500 mt-2">
+            Keep it short and helpful. No personal info needed.
+          </p>
         </div>
 
         {error && <p className="text-sm text-red-400">{error}</p>}
 
         {submitted && !error && (
-          <p className="text-sm text-emerald-400">Thanks — your report was submitted!</p>
+          <p className="text-sm text-emerald-400">
+            Thanks — your anonymous report was submitted.
+          </p>
         )}
 
         {isLocked && (
           <p className="text-sm text-zinc-500">
-            Already submitted recently. You can report again in ~{cooldownMinutesLeft} min.
+            Already submitted recently from this device. You can report again in about{' '}
+            {cooldownMinutesLeft} min.
           </p>
         )}
 
-        <div className="flex gap-3">
+        <div className="flex gap-3 flex-wrap">
           <button
             type="button"
             onClick={submit}
             disabled={submitting || isLocked}
             className="px-5 py-2.5 rounded-xl bg-gold-500 text-zinc-900 font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
           >
-            {submitting ? 'Submitting…' : isLocked ? 'Recently submitted' : 'Submit report'}
+            {submitting
+              ? 'Submitting…'
+              : isLocked
+                ? 'Recently submitted'
+                : 'Submit anonymous report'}
           </button>
           <button
             type="button"
@@ -303,16 +338,17 @@ export function CommunityReport({ locationId }: Props) {
         </div>
       </div>
 
-      {/* Recent reports log */}
       <details className="mt-8">
         <summary className="text-sm font-semibold text-zinc-200 cursor-pointer select-none">
-          Recent reports ({reports.length})
+          Recent anonymous reports ({reports.length})
         </summary>
         <div className="mt-3">
           {loading ? (
             <p className="text-sm text-zinc-500">Loading…</p>
           ) : reports.length === 0 ? (
-            <p className="text-sm text-zinc-500">No recent reports yet.</p>
+            <p className="text-sm text-zinc-500">
+              No recent reports yet. Be the first one to help out.
+            </p>
           ) : (
             <div className="space-y-3">
               {reports.slice(0, 5).map((report) => (
@@ -320,12 +356,15 @@ export function CommunityReport({ locationId }: Props) {
                   <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-500 mb-2">
                     <span>
                       {new Date(report.submitted_at).toLocaleString([], {
-                        month: 'short', day: 'numeric',
-                        hour: 'numeric', minute: '2-digit',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
                       })}
                     </span>
                     {report.floor_label && <span>{report.floor_label}</span>}
                   </div>
+
                   <div className="flex flex-wrap gap-2 text-xs mb-2">
                     {report.crowdedness !== null && (
                       <span className="px-2 py-1 rounded-full bg-zinc-800 text-zinc-300">
@@ -338,6 +377,7 @@ export function CommunityReport({ locationId }: Props) {
                       </span>
                     )}
                   </div>
+
                   {report.note && <p className="text-sm text-zinc-300">{report.note}</p>}
                 </div>
               ))}
