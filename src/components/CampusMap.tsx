@@ -8,6 +8,7 @@ import {
   Popup,
   useMap,
 } from 'react-leaflet'
+import type { LatLngBoundsExpression } from 'leaflet'
 
 type MapLocation = {
   id: string
@@ -32,7 +33,11 @@ type Props = {
   locations: MapLocation[]
 }
 
-const CAMPUS_CENTER: [number, number] = [43.4710, -80.5430]
+const CAMPUS_CENTER: [number, number] = [43.471, -80.543]
+const CAMPUS_BOUNDS: LatLngBoundsExpression = [
+  [43.4568, -80.5665],
+  [43.4792, -80.5285],
+]
 
 function SyncMapView({ locations }: { locations: MapLocation[] }) {
   const map = useMap()
@@ -42,9 +47,7 @@ function SyncMapView({ locations }: { locations: MapLocation[] }) {
       map.invalidateSize()
 
       const validPoints = locations.filter(
-        (loc) =>
-          typeof loc.latitude === 'number' &&
-          typeof loc.longitude === 'number'
+        (loc) => typeof loc.latitude === 'number' && typeof loc.longitude === 'number'
       )
 
       if (validPoints.length === 0) {
@@ -137,18 +140,14 @@ function getMarkerPriority(loc: MapLocation) {
 
 function dedupeLocations(locations: MapLocation[]) {
   const valid = locations.filter(
-    (loc) =>
-      typeof loc.latitude === 'number' &&
-      typeof loc.longitude === 'number'
+    (loc) => typeof loc.latitude === 'number' && typeof loc.longitude === 'number'
   )
 
   const bestByKey = new Map<string, MapLocation>()
 
   for (const loc of valid) {
     const code = getBuildingCode(loc)
-    const key =
-      code ??
-      `${loc.latitude!.toFixed(5)}:${loc.longitude!.toFixed(5)}`
+    const key = code ?? `${loc.latitude!.toFixed(5)}:${loc.longitude!.toFixed(5)}`
 
     const existing = bestByKey.get(key)
 
@@ -209,21 +208,23 @@ export default function CampusMap({ locations }: Props) {
 
   if (!mounted) {
     return (
-      <div className="space-y-3">
-        <div className="relative h-[520px] w-full overflow-hidden rounded-2xl border border-white/10 bg-zinc-900" />
+      <div className="relative z-0 space-y-3">
+        <div className="relative h-[420px] w-full overflow-hidden rounded-2xl border border-white/10 bg-zinc-900 sm:h-[520px]" />
       </div>
     )
   }
 
   return (
-    <div className="space-y-3">
-      <div className="relative h-[520px] w-full overflow-hidden rounded-2xl border border-white/10">
+    <div className="relative z-0 space-y-3">
+      <div className="relative h-[420px] w-full overflow-hidden rounded-2xl border border-white/10 sm:h-[520px]">
         <MapContainer
           key="campus-map"
           center={CAMPUS_CENTER}
           zoom={16}
-          minZoom={14}
-          maxZoom={20}
+          minZoom={15}
+          maxZoom={19}
+          maxBounds={CAMPUS_BOUNDS}
+          maxBoundsViscosity={1.0}
           zoomSnap={0.25}
           scrollWheelZoom={true}
           doubleClickZoom={true}
@@ -234,7 +235,7 @@ export default function CampusMap({ locations }: Props) {
           <TileLayer
             attribution="&copy; OpenStreetMap contributors"
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            maxZoom={20}
+            maxZoom={19}
           />
 
           {mapLocations.map((loc) => (
