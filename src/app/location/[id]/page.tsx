@@ -263,7 +263,7 @@ export default function LocationDetailPage({ params }: PageProps) {
               </h1>
 
               <p className="text-lg text-zinc-200 mb-2">
-                This is <span className="font-semibold text-zinc-100">UW Study Spots</span> for{' '}
+                Well now that we know you have a good sense of humour this is <span className="font-semibold text-zinc-100">UW Study Spots</span> for{' '}
                 <span className="font-semibold text-zinc-100">{location.name}</span>.
               </p>
 
@@ -297,7 +297,7 @@ export default function LocationDetailPage({ params }: PageProps) {
 
               <div className="mt-5 max-w-md overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950/50">
                 <Image
-                  src="/side-eye-monkey.png"
+                  src="/Drake.png"
                   alt="Side-eye monkey meme"
                   width={500}
                   height={500}
