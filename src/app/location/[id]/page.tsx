@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
@@ -243,7 +244,7 @@ export default function LocationDetailPage({ params }: PageProps) {
 
       {isQrView ? (
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 sm:p-6 mb-5">
-          <div className="grid gap-4 lg:grid-cols-[1.35fr_0.85fr] lg:items-start">
+          <div className="grid gap-5 lg:grid-cols-[1.35fr_0.85fr] lg:items-start">
             <div>
               <div className="flex flex-wrap gap-2 mb-4">
                 <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-gold-500/15 text-gold-400">
@@ -261,15 +262,15 @@ export default function LocationDetailPage({ params }: PageProps) {
                 Yeah the poster bait worked.
               </h1>
 
-              <p className="text-base text-zinc-200 mb-2">
+              <p className="text-lg text-zinc-200 mb-2">
                 This is <span className="font-semibold text-zinc-100">UW Study Spots</span> for{' '}
                 <span className="font-semibold text-zinc-100">{location.name}</span>.
               </p>
 
               <p className="text-sm text-zinc-400 leading-6 max-w-2xl">
-                Leave a quick anonymous report so the next student does not do the classic
-                “walk all the way there just to turn around” routine. Your accidental scan can
-                still be heroic.
+                Since you are already here, help the next student avoid the deeply unserious
+                “walk all the way there just to leave” experience. Takes a few seconds. No login.
+                No name. Mildly heroic.
               </p>
 
               <div className="mt-5 flex flex-wrap gap-3">
@@ -279,23 +280,37 @@ export default function LocationDetailPage({ params }: PageProps) {
                 >
                   Leave anonymous report
                 </a>
-                <Link
-                  href="/"
+
+                <a
+                  href={instagramUrl}
+                  target="_blank"
+                  rel="noreferrer"
                   className="inline-flex items-center justify-center rounded-xl bg-zinc-800 px-4 py-2.5 text-sm font-medium text-zinc-200 hover:bg-zinc-700 transition-colors"
                 >
-                  Explore all study spots
-                </Link>
+                  Follow @uwstudyspots
+                </a>
               </div>
 
               <p className="mt-3 text-xs text-zinc-500">
-                No login. No name. Takes a few seconds.
+                Your accidental scan still has a purpose.
               </p>
+
+              <div className="mt-5 max-w-md overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950/50">
+                <Image
+                  src="/side-eye-monkey.png"
+                  alt="Side-eye monkey meme"
+                  width={500}
+                  height={500}
+                  className="h-40 sm:h-44 w-full object-cover"
+                  priority
+                />
+              </div>
             </div>
 
             <div className="rounded-2xl border border-zinc-800 bg-zinc-950/50 p-4">
               <div className="flex items-center justify-between gap-3 mb-4">
                 <div>
-                  <p className="text-sm font-semibold text-zinc-100">Current status</p>
+                  <p className="text-lg font-semibold text-zinc-100">Better than guessing</p>
                   <p className="text-xs text-zinc-500">
                     {fetchedAt
                       ? `Updated ${formatDistanceToNow(new Date(fetchedAt), { addSuffix: true })}`
@@ -334,7 +349,7 @@ export default function LocationDetailPage({ params }: PageProps) {
 
                 <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
                   <p className="text-xs text-zinc-500">
-                    Better than guessing. Also better than wasting a campus walk.
+                    Saves wasted campus walks, bad guesses, and random side quests.
                   </p>
                 </div>
               </div>
@@ -471,11 +486,11 @@ export default function LocationDetailPage({ params }: PageProps) {
       )}
 
       <div id="student-report" className={clsx('scroll-mt-24', isQrView ? 'mb-4' : 'mb-6')}>
-      <CommunityReport
-        locationId={location.id}
-        locationName={location.name}
-        compact={isQrView}
-      />
+        <CommunityReport
+          locationId={location.id}
+          locationName={location.name}
+          compact={isQrView}
+        />
       </div>
 
       {!isQrView && detailState.liveData && (
@@ -554,7 +569,7 @@ export default function LocationDetailPage({ params }: PageProps) {
             rel="noreferrer"
             className="hover:text-zinc-300 transition-colors"
           >
-            Follow @uwstudyspots
+            Follow @uwstudyspots for the campus lore
           </a>
         </div>
       ) : (
