@@ -268,9 +268,9 @@ export default function LocationDetailPage({ params }: PageProps) {
               </p>
 
               <p className="text-sm text-zinc-400 leading-6 max-w-2xl">
-                Since you are already here, help the next student avoid the deeply unserious
-                “walk all the way there just to leave” experience. Takes a few seconds. No login.
-                No name. Mildly heroic.
+                This website allows you to see the crowdedness of every building on campus.
+                With your response other students know if the walk is worth it. Takes two seconds to help the next 
+                person and makes your scan kind of heroic.
               </p>
 
               <div className="mt-5 flex flex-wrap gap-3">
@@ -287,12 +287,12 @@ export default function LocationDetailPage({ params }: PageProps) {
                   rel="noreferrer"
                   className="inline-flex items-center justify-center rounded-xl bg-zinc-800 px-4 py-2.5 text-sm font-medium text-zinc-200 hover:bg-zinc-700 transition-colors"
                 >
-                  Follow @uwstudyspots
+                  Follow @uwstudyspots→
                 </a>
               </div>
 
               <p className="mt-3 text-xs text-zinc-500">
-                Your accidental scan still has a purpose.
+                Your scan has a purpose.
               </p>
 
               <div className="mt-5 max-w-md overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950/50">
@@ -392,7 +392,7 @@ export default function LocationDetailPage({ params }: PageProps) {
                 rel="noreferrer"
                 className="inline-flex items-center justify-center rounded-xl bg-zinc-800 px-4 py-2.5 text-sm font-medium text-zinc-200 hover:bg-zinc-700 transition-colors"
               >
-                Follow @uwstudyspots
+                Follow @uwstudyspots→
               </a>
             </div>
           </div>
@@ -561,7 +561,7 @@ export default function LocationDetailPage({ params }: PageProps) {
       {isQrView ? (
         <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-zinc-500 pb-2">
           <Link href="/" className="hover:text-zinc-300 transition-colors">
-            Explore all study spots
+            Check out the rest of the website→
           </Link>
           <a
             href={instagramUrl}
@@ -569,7 +569,7 @@ export default function LocationDetailPage({ params }: PageProps) {
             rel="noreferrer"
             className="hover:text-zinc-300 transition-colors"
           >
-            Follow @uwstudyspots for the campus lore
+            Follow @uwstudyspots for the campus lore→
           </a>
         </div>
       ) : (
