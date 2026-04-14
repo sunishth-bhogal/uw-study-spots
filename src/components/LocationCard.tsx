@@ -6,7 +6,6 @@ import { formatDistanceToNow } from 'date-fns'
 import clsx from 'clsx'
 import { Location } from '@/lib/types'
 import { BusynessBar } from './BusynessBar'
-import { VibeCheck } from './VibeCheck'
 
 interface Props {
   location: Location
@@ -255,24 +254,6 @@ export function LocationCard({ location, isFavourite, onToggleFavourite, compact
         </div>
       </div>
 
-      {/* Quick feedback — pointer-events-auto so it's interactive, above link */}
-      {showQuickFeedback && (
-        <div
-          className="relative z-20 mt-4 rounded-xl border border-zinc-800 bg-zinc-950/60 p-3 pointer-events-auto"
-          onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-          }}
-        >
-          <div className="mb-2">
-            <p className="text-sm font-medium text-zinc-100">Quick feedback</p>
-            <p className="text-xs text-zinc-500">
-              {liveData ? 'Does this live reading feel right?' : 'How busy is it right now?'}
-            </p>
-          </div>
-          <VibeCheck locationId={location.id} />
-        </div>
-      )}
     </div>
   )
 }
