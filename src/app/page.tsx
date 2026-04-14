@@ -339,26 +339,24 @@ export default function Dashboard() {
       <section className="mb-8 rounded-[28px] border border-zinc-800 bg-zinc-900/60 p-4 sm:p-8 lg:p-10">
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-start lg:gap-8">
           <div>
-            <div className="flex flex-wrap gap-2 mb-4">
-              <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-gold-500/15 text-gold-400">
+            <div className="mb-4 flex flex-wrap gap-2">
+              <span className="rounded-full bg-gold-500/15 px-2.5 py-1 text-xs font-medium text-gold-400">
                 Live where available
               </span>
-              <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-zinc-900 text-zinc-300">
+              <span className="rounded-full bg-zinc-900 px-2.5 py-1 text-xs font-medium text-zinc-300">
                 Student-reported
               </span>
-              <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-zinc-900 text-zinc-300">
+              <span className="rounded-full bg-zinc-900 px-2.5 py-1 text-xs font-medium text-zinc-300">
                 Built for UW
               </span>
             </div>
 
             <h1 className="max-w-4xl text-[2.6rem] font-bold leading-[0.95] tracking-tight text-zinc-100 sm:text-5xl lg:text-6xl lg:leading-[1.02]">
               Find a good study
-              <br className="hidden sm:block" />
-              {' '}spot
+              <br className="hidden sm:block" /> spot
               <span className="text-gold-500"> before </span>
               you
-              <br className="hidden sm:block" />
-              {' '}waste the walk.
+              <br className="hidden sm:block" /> waste the walk.
             </h1>
 
             <p className="mt-4 max-w-2xl text-base leading-7 text-zinc-400 sm:text-lg">
@@ -369,14 +367,14 @@ export default function Dashboard() {
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <a
                 href="#study-spots"
-                className="inline-flex w-full items-center justify-center rounded-xl bg-gold-500 px-5 py-3 text-sm font-semibold text-zinc-900 hover:opacity-90 transition-opacity sm:w-auto"
+                className="inline-flex w-full items-center justify-center rounded-xl bg-gold-500 px-5 py-3 text-sm font-semibold text-zinc-900 transition-opacity hover:opacity-90 sm:w-auto"
               >
                 Find a spot now
               </a>
 
               <a
                 href="#map"
-                className="inline-flex w-full items-center justify-center rounded-xl bg-zinc-900 px-5 py-3 text-sm font-medium text-zinc-200 hover:bg-zinc-800 transition-colors sm:w-auto"
+                className="inline-flex w-full items-center justify-center rounded-xl bg-zinc-900 px-5 py-3 text-sm font-medium text-zinc-200 transition-colors hover:bg-zinc-800 sm:w-auto"
               >
                 Open campus map
               </a>
@@ -424,7 +422,7 @@ export default function Dashboard() {
           </div>
 
           <div className="rounded-3xl border border-zinc-800 bg-zinc-950/60 p-4 sm:p-6">
-            <div className="mb-4 flex items-center justify-between gap-3 sm:mb-5">
+            <div className="mb-4 flex items-center justify-between gap-3">
               <div>
                 <p className="text-xl font-semibold text-zinc-100">How it works</p>
                 <p className="text-sm text-zinc-500">Fast enough to check between classes.</p>
@@ -438,38 +436,24 @@ export default function Dashboard() {
               <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4">
                 <p className="text-sm font-semibold text-zinc-100">1. Check the latest vibe</p>
                 <p className="mt-1 text-sm text-zinc-500">
-                  Use live occupancy where available or recent student reports when it is not.
+                  Use live data or recent student reports.
                 </p>
               </div>
 
               <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4">
                 <p className="text-sm font-semibold text-zinc-100">2. Compare before walking</p>
                 <p className="mt-1 text-sm text-zinc-500">
-                  Look at crowd levels, quietness, seating, and freshness of the update.
+                  Look at crowd level, quietness, and how recent the update is.
                 </p>
               </div>
 
               <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4">
                 <p className="text-sm font-semibold text-zinc-100">3. Leave a quick report</p>
                 <p className="mt-1 text-sm text-zinc-500">
-                  Takes a few seconds and saves the next person from a pointless side quest.
+                  Takes a few seconds and helps the next person.
                 </p>
               </div>
             </div>
-
-            <div className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4 sm:mt-5">
-              <p className="mb-2 text-xs uppercase tracking-wide text-zinc-500">Freshness matters</p>
-              <p className="text-sm leading-6 text-zinc-300">
-                Newer readings and reports are more reliable, so always check the latest update
-                time before committing to the walk.
-              </p>
-            </div>
-
-            {fetchedAt && (
-              <p className="mt-4 text-xs text-zinc-500">
-                Updated {formatDistanceToNow(new Date(fetchedAt), { addSuffix: true })}
-              </p>
-            )}
           </div>
         </div>
       </section>
