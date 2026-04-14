@@ -259,6 +259,17 @@ export default function LocationDetailPage({ params }: PageProps) {
                 </span>
               </div>
 
+              <div className="mt-5 max-w-md overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950/50 p-2">
+                <Image
+                  src="/Drake.png"
+                  alt="Drake reaction meme"
+                  width={500}
+                  height={500}
+                  className="w-full h-auto max-h-[260px] object-contain object-center rounded-xl"
+                  priority
+                />
+              </div>
+
               <h1 className="text-3xl sm:text-4xl font-bold text-zinc-100 leading-tight mb-3">
                 Yeah the poster bait worked.
               </h1>
@@ -296,17 +307,6 @@ export default function LocationDetailPage({ params }: PageProps) {
               <p className="mt-3 text-xs text-zinc-500">
                 Your scan has a purpose.
               </p>
-
-              <div className="mt-5 max-w-md overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950/50 p-2">
-                <Image
-                  src="/Drake.png"
-                  alt="Drake reaction meme"
-                  width={500}
-                  height={500}
-                  className="w-full h-auto max-h-[260px] object-contain object-center rounded-xl"
-                  priority
-                />
-              </div>
             </div>
 
             <div className="rounded-2xl border border-zinc-800 bg-zinc-950/50 p-4">
