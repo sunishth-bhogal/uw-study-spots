@@ -74,6 +74,10 @@ function hasLiveOccupancyData(location: Location) {
   return capacity > 0 && current >= 0
 }
 
+function getSource(location: Location) {
+  return getStringValue(location, ['dataSource', 'source']) ?? 'building'
+}
+
 function getBusyness(location: Location) {
   const value = getNumberValue(location, ['busyness', 'occupancy_percent', 'occupancyPercent'])
   return value ?? null
@@ -112,6 +116,7 @@ function formatReportSummary(reportCount: number, lastReportedAt: string | null)
 }
 
 export function LocationCard({ location, isFavourite = false, onToggleFavourite }: Props) {
+  const source = getSource(location)
   const liveData = hasLiveOccupancyData(location)
   const reportCount = getReportCount(location)
   const lastReportedAt = getLastReportedAt(location)
@@ -126,7 +131,11 @@ export function LocationCard({ location, isFavourite = false, onToggleFavourite 
     lastReportedMs !== null ? now - lastReportedMs > 3 * 60 * 60 * 1000 : false
 
   const showRecentReportBadge = reportCount > 0 && within24h
-  const showStudentTracker = liveData || (showRecentReportBadge && !olderThan3h && busyness !== null)
+  const liveBacked = liveData || source === 'waitz'
+
+  const showBusynessTracker =
+    busyness !== null &&
+    (liveBacked || (showRecentReportBadge && !olderThan3h))
 
   const summaryText = liveData
     ? `~${getCurrentOccupancy(location)} / ${getCapacity(location)} people`
@@ -172,7 +181,7 @@ export function LocationCard({ location, isFavourite = false, onToggleFavourite 
         </button>
       </div>
 
-      {showStudentTracker && (
+      {showBusynessTracker && (
         <div className="mb-4">
           <div className="h-2.5 overflow-hidden rounded-full bg-zinc-700">
             <div
