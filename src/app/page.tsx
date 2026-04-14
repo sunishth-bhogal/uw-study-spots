@@ -336,8 +336,8 @@ export default function Dashboard() {
 
   return (
     <div>
-      <section className="mb-8 rounded-3xl border border-zinc-800 bg-zinc-900/60 p-6 sm:p-8 lg:p-10">
-        <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-start">
+      <section className="mb-8 rounded-[28px] border border-zinc-800 bg-zinc-900/60 p-4 sm:p-8 lg:p-10">
+        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-start lg:gap-8">
           <div>
             <div className="flex flex-wrap gap-2 mb-4">
               <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-gold-500/15 text-gold-400">
@@ -351,39 +351,43 @@ export default function Dashboard() {
               </span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-zinc-100 leading-[1.05] max-w-4xl">
-              Find a good study spot
+            <h1 className="max-w-4xl text-[2.6rem] font-bold leading-[0.95] tracking-tight text-zinc-100 sm:text-5xl lg:text-6xl lg:leading-[1.02]">
+              Find a good study
+              <br className="hidden sm:block" />
+              {' '}spot
               <span className="text-gold-500"> before </span>
-              you waste the walk.
+              you
+              <br className="hidden sm:block" />
+              {' '}waste the walk.
             </h1>
 
-            <p className="mt-4 text-base sm:text-lg text-zinc-400 leading-7 max-w-2xl">
+            <p className="mt-4 max-w-2xl text-base leading-7 text-zinc-400 sm:text-lg">
               See live busyness where available, plus student reports on quietness, seating,
               and crowd levels across campus.
             </p>
 
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <a
                 href="#study-spots"
-                className="inline-flex items-center justify-center rounded-xl bg-gold-500 px-5 py-3 text-sm font-semibold text-zinc-900 hover:opacity-90 transition-opacity"
+                className="inline-flex w-full items-center justify-center rounded-xl bg-gold-500 px-5 py-3 text-sm font-semibold text-zinc-900 hover:opacity-90 transition-opacity sm:w-auto"
               >
                 Find a spot now
               </a>
 
               <a
                 href="#map"
-                className="inline-flex items-center justify-center rounded-xl bg-zinc-900 px-5 py-3 text-sm font-medium text-zinc-200 hover:bg-zinc-800 transition-colors"
+                className="inline-flex w-full items-center justify-center rounded-xl bg-zinc-900 px-5 py-3 text-sm font-medium text-zinc-200 hover:bg-zinc-800 transition-colors sm:w-auto"
               >
                 Open campus map
               </a>
             </div>
 
-            <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="mt-6 grid grid-cols-2 gap-3 sm:mt-8 sm:grid-cols-4">
               <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4">
                 <div className="text-2xl font-bold text-zinc-100">
                   {loading ? '—' : allVisibleLocations.length}
                 </div>
-                <div className="text-xs text-zinc-500 mt-1">Active spots</div>
+                <div className="mt-1 text-xs text-zinc-500">Active spots</div>
               </div>
 
               <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4">
@@ -400,32 +404,32 @@ export default function Dashboard() {
                 >
                   {avgLiveBusyness === null ? '—' : `${avgLiveBusyness}%`}
                 </div>
-                <div className="text-xs text-zinc-500 mt-1">Avg busyness</div>
+                <div className="mt-1 text-xs text-zinc-500">Avg busyness</div>
               </div>
 
               <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4">
                 <div className="text-2xl font-bold text-zinc-100">
                   {loading ? '—' : `${totalReportsToDate}+`}
                 </div>
-                <div className="text-xs text-zinc-500 mt-1">Reports to date</div>
+                <div className="mt-1 text-xs text-zinc-500">Reports to date</div>
               </div>
 
               <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4">
                 <div className="text-2xl font-bold text-gold-400">
                   {visitorCount === null ? '—' : `${visitorCount}+`}
                 </div>
-                <div className="text-xs text-zinc-500 mt-1">Students helped</div>
+                <div className="mt-1 text-xs text-zinc-500">Students helped</div>
               </div>
             </div>
           </div>
 
-          <div className="rounded-3xl border border-zinc-800 bg-zinc-950/60 p-5 sm:p-6">
-            <div className="flex items-center justify-between gap-3 mb-5">
+          <div className="rounded-3xl border border-zinc-800 bg-zinc-950/60 p-4 sm:p-6">
+            <div className="mb-4 flex items-center justify-between gap-3 sm:mb-5">
               <div>
-                <p className="text-lg font-semibold text-zinc-100">How it works</p>
+                <p className="text-xl font-semibold text-zinc-100">How it works</p>
                 <p className="text-sm text-zinc-500">Fast enough to check between classes.</p>
               </div>
-              <div className="h-10 w-10 rounded-2xl bg-gold-500/15 flex items-center justify-center text-gold-400">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gold-500/15 text-gold-400">
                 📍
               </div>
             </div>
@@ -433,29 +437,29 @@ export default function Dashboard() {
             <div className="space-y-3">
               <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4">
                 <p className="text-sm font-semibold text-zinc-100">1. Check the latest vibe</p>
-                <p className="text-sm text-zinc-500 mt-1">
+                <p className="mt-1 text-sm text-zinc-500">
                   Use live occupancy where available or recent student reports when it is not.
                 </p>
               </div>
 
               <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4">
                 <p className="text-sm font-semibold text-zinc-100">2. Compare before walking</p>
-                <p className="text-sm text-zinc-500 mt-1">
+                <p className="mt-1 text-sm text-zinc-500">
                   Look at crowd levels, quietness, seating, and freshness of the update.
                 </p>
               </div>
 
               <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4">
                 <p className="text-sm font-semibold text-zinc-100">3. Leave a quick report</p>
-                <p className="text-sm text-zinc-500 mt-1">
+                <p className="mt-1 text-sm text-zinc-500">
                   Takes a few seconds and saves the next person from a pointless side quest.
                 </p>
               </div>
             </div>
 
-            <div className="mt-5 rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4">
-              <p className="text-xs uppercase tracking-wide text-zinc-500 mb-2">Freshness matters</p>
-              <p className="text-sm text-zinc-300 leading-6">
+            <div className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4 sm:mt-5">
+              <p className="mb-2 text-xs uppercase tracking-wide text-zinc-500">Freshness matters</p>
+              <p className="text-sm leading-6 text-zinc-300">
                 Newer readings and reports are more reliable, so always check the latest update
                 time before committing to the walk.
               </p>
@@ -476,7 +480,10 @@ export default function Dashboard() {
             <h2 className="text-lg font-semibold text-zinc-100">See it on the map</h2>
             <p className="text-sm text-zinc-500">Explore every listed study spot across campus.</p>
           </div>
-          <CampusMap locations={allVisibleLocations} />
+
+          <div className="relative z-0 overflow-hidden rounded-2xl">
+            <CampusMap locations={allVisibleLocations} />
+          </div>
         </div>
       )}
 
