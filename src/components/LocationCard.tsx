@@ -10,6 +10,13 @@ interface Props {
   onToggleFavourite?: (locationId: string) => void
 }
 
+type SubLocation = {
+  name: string
+  busyness: number
+  count?: number
+  capacity?: number
+}
+
 function getNumberValue(location: Location, keys: string[]) {
   for (const key of keys) {
     const value = Number((location as any)[key])
@@ -115,6 +122,29 @@ function formatReportSummary(reportCount: number, lastReportedAt: string | null)
   })}`
 }
 
+function getSubLocations(location: Location): SubLocation[] {
+  const raw = (location as any).subLocations
+  if (!Array.isArray(raw)) return []
+
+  return raw.filter(
+    (sub) =>
+      sub &&
+      typeof sub.name === 'string' &&
+      Number.isFinite(Number(sub.busyness))
+  )
+}
+
+function formatSubLocationPeople(sub: SubLocation) {
+  const count = Number(sub.count)
+  const capacity = Number(sub.capacity)
+
+  if (Number.isFinite(count) && Number.isFinite(capacity) && capacity > 0) {
+    return `${count}/${capacity}`
+  }
+
+  return null
+}
+
 export function LocationCard({ location, isFavourite = false, onToggleFavourite }: Props) {
   const source = getSource(location)
   const liveData = hasLiveOccupancyData(location)
@@ -122,6 +152,7 @@ export function LocationCard({ location, isFavourite = false, onToggleFavourite 
   const lastReportedAt = getLastReportedAt(location)
   const busyness = getBusyness(location)
   const categoryLabel = getCategoryLabel(location)
+  const subLocations = getSubLocations(location)
 
   const lastReportedMs = lastReportedAt ? new Date(lastReportedAt).getTime() : null
   const now = Date.now()
@@ -133,9 +164,11 @@ export function LocationCard({ location, isFavourite = false, onToggleFavourite 
   const showRecentReportBadge = reportCount > 0 && within24h
   const liveBacked = liveData || source === 'waitz'
 
-  const showBusynessTracker =
+  const showMainTracker =
     busyness !== null &&
     (liveBacked || (showRecentReportBadge && !olderThan3h))
+
+  const showSubLocationBreakdown = liveBacked && subLocations.length > 0
 
   const summaryText = liveData
     ? `~${getCurrentOccupancy(location)} / ${getCapacity(location)} people`
@@ -157,7 +190,13 @@ export function LocationCard({ location, isFavourite = false, onToggleFavourite 
           </div>
 
           <div className="mt-2 flex flex-wrap gap-2">
-            {showRecentReportBadge && (
+            {liveBacked && (
+              <span className="rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-medium text-emerald-300">
+                Waitz live data
+              </span>
+            )}
+
+            {!liveBacked && showRecentReportBadge && (
               <span className="rounded-full bg-blue-500/15 px-2.5 py-1 text-xs font-medium text-blue-300">
                 Reported in last 24h
               </span>
@@ -181,8 +220,8 @@ export function LocationCard({ location, isFavourite = false, onToggleFavourite 
         </button>
       </div>
 
-      {showBusynessTracker && (
-        <div className="mb-4">
+      {showMainTracker && (
+        <div className={showSubLocationBreakdown ? 'mb-3' : 'mb-4'}>
           <div className="h-2.5 overflow-hidden rounded-full bg-zinc-700">
             <div
               className={`h-full rounded-full ${getBusynessColor(busyness)}`}
@@ -196,6 +235,31 @@ export function LocationCard({ location, isFavourite = false, onToggleFavourite 
               {busyness === null ? '—' : `${Math.round(busyness)}%`}
             </span>
           </div>
+        </div>
+      )}
+
+      {showSubLocationBreakdown && (
+        <div className="mb-4 space-y-2.5">
+          {subLocations.map((sub, index) => {
+            const peopleText = formatSubLocationPeople(sub)
+            return (
+              <div key={`${sub.name}-${index}`}>
+                <div className="mb-1 flex items-center justify-between gap-3 text-sm">
+                  <span className="truncate text-zinc-500">{sub.name}</span>
+                  <span className="shrink-0 text-zinc-500">
+                    {peopleText ?? `${Math.round(sub.busyness)}%`}
+                  </span>
+                </div>
+
+                <div className="h-1.5 overflow-hidden rounded-full bg-zinc-700">
+                  <div
+                    className={`h-full rounded-full ${getBusynessColor(sub.busyness)}`}
+                    style={{ width: `${Math.max(0, Math.min(100, sub.busyness))}%` }}
+                  />
+                </div>
+              </div>
+            )
+          })}
         </div>
       )}
 
