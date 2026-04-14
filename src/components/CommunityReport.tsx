@@ -6,6 +6,7 @@ import clsx from 'clsx'
 interface Props {
   locationId: string
   locationName?: string
+  compact?: boolean
 }
 
 interface CommunitySummary {
@@ -52,7 +53,7 @@ function minutesRemaining(untilIso: string | null) {
   return Math.max(0, Math.ceil(diffMs / 60000))
 }
 
-export function CommunityReport({ locationId, locationName }: Props) {
+export function CommunityReport({ locationId, locationName, compact = false }: Props) {
   const [summary, setSummary] = useState<CommunitySummary | null>(null)
   const [reports, setReports] = useState<CommunityReportRow[]>([])
   const [loading, setLoading] = useState(true)
@@ -60,6 +61,7 @@ export function CommunityReport({ locationId, locationName }: Props) {
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [cooldownUntil, setCooldownUntil] = useState<string | null>(null)
+  const [showNote, setShowNote] = useState(false)
 
   const [crowdedness, setCrowdedness] = useState<number | null>(null)
   const [quietness, setQuietness] = useState<number | null>(null)
@@ -121,11 +123,15 @@ export function CommunityReport({ locationId, locationName }: Props) {
 
   const cooldownMinutesLeft = useMemo(() => minutesRemaining(cooldownUntil), [cooldownUntil])
   const isLocked = cooldownMinutesLeft > 0
+  const hasSummaryStats =
+    summary &&
+    (summary.avg_crowdedness != null || summary.avg_quietness != null || summary.report_count > 0)
 
   const resetForm = () => {
     setCrowdedness(null)
     setQuietness(null)
     setNote('')
+    setShowNote(false)
   }
 
   const submit = async () => {
@@ -170,42 +176,59 @@ export function CommunityReport({ locationId, locationName }: Props) {
   }
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-      <div className="flex flex-col gap-4 mb-6">
+    <div
+      className={clsx(
+        'bg-zinc-900 border border-zinc-800 rounded-2xl',
+        compact ? 'p-4 sm:p-5' : 'p-6'
+      )}
+    >
+      <div className={clsx('flex flex-col', compact ? 'gap-3 mb-4' : 'gap-4 mb-6')}>
         <div className="flex flex-wrap gap-2">
           <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-gold-500/15 text-gold-400">
             Anonymous
           </span>
           <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-zinc-800 text-zinc-300">
-            Takes a few seconds
+            Quick report
           </span>
-          <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-zinc-800 text-zinc-300">
-            Helps other students
-          </span>
+          {!compact && (
+            <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-zinc-800 text-zinc-300">
+              Helps other students
+            </span>
+          )}
         </div>
 
         <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div className="max-w-2xl">
-            <h2 className="text-xl font-semibold text-zinc-100 mb-2">
-              Help the next student out
+          <div className={clsx('max-w-2xl', compact && 'max-w-none')}>
+            <h2
+              className={clsx(
+                'font-semibold text-zinc-100 mb-2',
+                compact ? 'text-lg' : 'text-xl'
+              )}
+            >
+              {compact ? 'Leave a quick anonymous report' : 'Help the next student out'}
             </h2>
-            <p className="text-sm text-zinc-400 leading-6">
-              This report is completely anonymous. No name, no login, just a quick way to tell
-              people what <span className="text-zinc-200 font-medium">{displayName}</span> looks
-              like right now before they start walking there.
+
+            <p className={clsx('text-zinc-400 leading-6', compact ? 'text-sm' : 'text-sm')}>
+              Tell people what{' '}
+              <span className="text-zinc-200 font-medium">{displayName}</span> feels like right now
+              before they start walking there.
+              {compact && ' Takes a few seconds.'}
             </p>
-            <p className="text-sm text-zinc-500 leading-6 mt-2">
-              UW Study Spots only gets better if students keep helping students, so every report
-              makes this page more useful for everyone else.
-            </p>
+
+            {!compact && (
+              <p className="text-sm text-zinc-500 leading-6 mt-2">
+                UW Study Spots only gets better if students keep helping students, so every report
+                makes this page more useful for everyone else.
+              </p>
+            )}
           </div>
 
-          {summary && (
+          {summary && summary.report_count > 0 && (
             <div className="text-left sm:text-right text-xs text-zinc-500 shrink-0">
-              <div>{summary.report_count} recent reports</div>
+              <div>{summary.report_count} recent report{summary.report_count === 1 ? '' : 's'}</div>
               {summary.last_reported_at && (
                 <div>
-                  Last report:{' '}
+                  Last report{' '}
                   {new Date(summary.last_reported_at).toLocaleTimeString([], {
                     hour: 'numeric',
                     minute: '2-digit',
@@ -217,26 +240,45 @@ export function CommunityReport({ locationId, locationName }: Props) {
         </div>
       </div>
 
-      {summary && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+      {hasSummaryStats && (
+        <div
+          className={clsx(
+            'grid gap-3',
+            compact ? 'grid-cols-1 sm:grid-cols-3 mb-4' : 'grid-cols-1 sm:grid-cols-3 mb-6'
+          )}
+        >
           <div className="bg-zinc-950/60 border border-zinc-800 rounded-xl p-3">
-            <div className="text-lg font-bold text-zinc-100">
-              {summary.avg_crowdedness != null ? `${summary.avg_crowdedness}%` : '—'}
+            <div className="text-base font-bold text-zinc-100">
+              {summary?.report_count ?? 0}
             </div>
-            <div className="text-xs text-zinc-500">Avg crowdedness from recent reports</div>
+            <div className="text-xs text-zinc-500">Recent reports</div>
           </div>
-          <div className="bg-zinc-950/60 border border-zinc-800 rounded-xl p-3">
-            <div className="text-lg font-bold text-zinc-100">
-              {summary.avg_quietness != null ? `${summary.avg_quietness} / 5` : '—'}
+
+          {summary?.avg_crowdedness != null && (
+            <div className="bg-zinc-950/60 border border-zinc-800 rounded-xl p-3">
+              <div className="text-base font-bold text-zinc-100">
+                {summary.avg_crowdedness}%
+              </div>
+              <div className="text-xs text-zinc-500">Avg crowdedness</div>
             </div>
-            <div className="text-xs text-zinc-500">Avg quietness from recent reports</div>
-          </div>
+          )}
+
+          {summary?.avg_quietness != null && (
+            <div className="bg-zinc-950/60 border border-zinc-800 rounded-xl p-3">
+              <div className="text-base font-bold text-zinc-100">
+                {summary.avg_quietness} / 5
+              </div>
+              <div className="text-xs text-zinc-500">Avg quietness</div>
+            </div>
+          )}
         </div>
       )}
 
-      <div className="space-y-5">
+      <div className={clsx('space-y-4', !compact && 'space-y-5')}>
         <div>
-          <p className="text-sm font-medium text-zinc-300 mb-2">How crowded was it?</p>
+          <p className="text-sm font-medium text-zinc-300 mb-2">
+            {compact ? 'How crowded?' : 'How crowded was it?'}
+          </p>
           <div className="flex flex-wrap gap-2">
             {crowdednessOptions.map((opt) => (
               <button
@@ -245,7 +287,8 @@ export function CommunityReport({ locationId, locationName }: Props) {
                 onClick={() => setCrowdedness(opt.value)}
                 disabled={isLocked}
                 className={clsx(
-                  'px-3 py-2 rounded-lg text-sm border transition-colors',
+                  'rounded-lg text-sm border transition-colors',
+                  compact ? 'px-3 py-2' : 'px-3 py-2',
                   crowdedness === opt.value
                     ? 'bg-gold-500 text-zinc-900 border-gold-500 font-semibold'
                     : 'bg-zinc-800 text-zinc-300 border-zinc-700 hover:bg-zinc-700',
@@ -259,8 +302,10 @@ export function CommunityReport({ locationId, locationName }: Props) {
         </div>
 
         <div>
-          <p className="text-sm font-medium text-zinc-300 mb-2">How quiet was it?</p>
-          <div className="flex gap-2">
+          <p className="text-sm font-medium text-zinc-300 mb-2">
+            {compact ? 'How quiet?' : 'How quiet was it?'}
+          </p>
+          <div className="flex gap-2 flex-wrap">
             {quietnessOptions.map((value) => (
               <button
                 key={value}
@@ -268,7 +313,8 @@ export function CommunityReport({ locationId, locationName }: Props) {
                 onClick={() => setQuietness(value)}
                 disabled={isLocked}
                 className={clsx(
-                  'w-10 h-10 rounded-lg text-sm border transition-colors',
+                  'rounded-lg text-sm border transition-colors',
+                  compact ? 'w-9 h-9' : 'w-10 h-10',
                   quietness === value
                     ? 'bg-gold-500 text-zinc-900 border-gold-500 font-semibold'
                     : 'bg-zinc-800 text-zinc-300 border-zinc-700 hover:bg-zinc-700',
@@ -282,22 +328,52 @@ export function CommunityReport({ locationId, locationName }: Props) {
           <p className="text-xs text-zinc-500 mt-1.5">1 = noisy · 5 = very quiet</p>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-zinc-300 mb-2">
-            Note <span className="text-zinc-500 font-normal">(optional)</span>
-          </label>
-          <input
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            disabled={isLocked}
-            placeholder="e.g. packed near the entrance, upstairs is quieter"
-            maxLength={300}
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-gold-500 disabled:opacity-60"
-          />
-          <p className="text-xs text-zinc-500 mt-2">
-            Keep it short and helpful. No personal info needed.
-          </p>
-        </div>
+        {compact ? (
+          <div>
+            {!showNote ? (
+              <button
+                type="button"
+                onClick={() => setShowNote(true)}
+                disabled={isLocked}
+                className="text-sm text-zinc-400 hover:text-zinc-200 transition-colors disabled:opacity-50"
+              >
+                + Add optional note
+              </button>
+            ) : (
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-2">
+                  Note <span className="text-zinc-500 font-normal">(optional)</span>
+                </label>
+                <input
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  disabled={isLocked}
+                  placeholder="e.g. upstairs is quieter"
+                  maxLength={300}
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-gold-500 disabled:opacity-60"
+                />
+                <p className="text-xs text-zinc-500 mt-2">Keep it short. No personal info.</p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div>
+            <label className="block text-sm font-medium text-zinc-300 mb-2">
+              Note <span className="text-zinc-500 font-normal">(optional)</span>
+            </label>
+            <input
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              disabled={isLocked}
+              placeholder="e.g. packed near the entrance, upstairs is quieter"
+              maxLength={300}
+              className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-gold-500 disabled:opacity-60"
+            />
+            <p className="text-xs text-zinc-500 mt-2">
+              Keep it short and helpful. No personal info needed.
+            </p>
+          </div>
+        )}
 
         {error && <p className="text-sm text-red-400">{error}</p>}
 
@@ -325,8 +401,11 @@ export function CommunityReport({ locationId, locationName }: Props) {
               ? 'Submitting…'
               : isLocked
                 ? 'Recently submitted'
-                : 'Submit anonymous report'}
+                : compact
+                  ? 'Submit report'
+                  : 'Submit anonymous report'}
           </button>
+
           <button
             type="button"
             onClick={resetForm}
@@ -338,10 +417,11 @@ export function CommunityReport({ locationId, locationName }: Props) {
         </div>
       </div>
 
-      <details className="mt-8">
+      <details className={clsx(compact ? 'mt-5' : 'mt-8')}>
         <summary className="text-sm font-semibold text-zinc-200 cursor-pointer select-none">
           Recent anonymous reports ({reports.length})
         </summary>
+
         <div className="mt-3">
           {loading ? (
             <p className="text-sm text-zinc-500">Loading…</p>
@@ -351,8 +431,14 @@ export function CommunityReport({ locationId, locationName }: Props) {
             </p>
           ) : (
             <div className="space-y-3">
-              {reports.slice(0, 5).map((report) => (
-                <div key={report.id} className="bg-zinc-950/60 border border-zinc-800 rounded-xl p-4">
+              {reports.slice(0, compact ? 3 : 5).map((report) => (
+                <div
+                  key={report.id}
+                  className={clsx(
+                    'bg-zinc-950/60 border border-zinc-800 rounded-xl',
+                    compact ? 'p-3' : 'p-4'
+                  )}
+                >
                   <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-500 mb-2">
                     <span>
                       {new Date(report.submitted_at).toLocaleString([], {

@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
@@ -203,7 +202,7 @@ export default function LocationDetailPage({ params }: PageProps) {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto">
+      <div className={clsx('mx-auto', isQrView ? 'max-w-3xl' : 'max-w-4xl')}>
         <div className="animate-pulse space-y-4">
           <div className="h-6 w-40 bg-zinc-800 rounded" />
           <div className="h-10 w-72 bg-zinc-800 rounded" />
@@ -232,8 +231,8 @@ export default function LocationDetailPage({ params }: PageProps) {
   const instagramUrl = 'https://instagram.com/uwstudyspots'
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="mb-6">
+    <div className={clsx('mx-auto', isQrView ? 'max-w-3xl' : 'max-w-4xl')}>
+      <div className={clsx('mb-6', isQrView && 'mb-4')}>
         <Link
           href="/"
           className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
@@ -243,8 +242,8 @@ export default function LocationDetailPage({ params }: PageProps) {
       </div>
 
       {isQrView ? (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
-          <div className="grid gap-6 lg:grid-cols-[1.6fr_0.95fr] lg:items-start">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 sm:p-6 mb-5">
+          <div className="grid gap-4 lg:grid-cols-[1.35fr_0.85fr] lg:items-start">
             <div>
               <div className="flex flex-wrap gap-2 mb-4">
                 <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-gold-500/15 text-gold-400">
@@ -258,20 +257,19 @@ export default function LocationDetailPage({ params }: PageProps) {
                 </span>
               </div>
 
-              <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 mb-3">
+              <h1 className="text-3xl sm:text-4xl font-bold text-zinc-100 leading-tight mb-3">
                 Yeah the poster bait worked.
-              </h2>
+              </h1>
 
               <p className="text-base text-zinc-200 mb-2">
-                Well this is <span className="font-semibold text-zinc-100">UW Study Spots</span> for{' '}
+                This is <span className="font-semibold text-zinc-100">UW Study Spots</span> for{' '}
                 <span className="font-semibold text-zinc-100">{location.name}</span>.
               </p>
 
               <p className="text-sm text-zinc-400 leading-6 max-w-2xl">
-                So why are you here? You can report the crowdedness of where you are in a quick
-                anonymous report so the next student has a better shot than pure guesswork only to
-                try the next spot. As a community we can help each other. Takes two seconds to help
-                the next person and makes your accidental scan kind of heroic.
+                Leave a quick anonymous report so the next student does not do the classic
+                “walk all the way there just to turn around” routine. Your accidental scan can
+                still be heroic.
               </p>
 
               <div className="mt-5 flex flex-wrap gap-3">
@@ -281,62 +279,63 @@ export default function LocationDetailPage({ params }: PageProps) {
                 >
                   Leave anonymous report
                 </a>
-                <a
-                  href={instagramUrl}
-                  target="_blank"
-                  rel="noreferrer"
+                <Link
+                  href="/"
                   className="inline-flex items-center justify-center rounded-xl bg-zinc-800 px-4 py-2.5 text-sm font-medium text-zinc-200 hover:bg-zinc-700 transition-colors"
                 >
-                  Follow @uwstudyspots
-                </a>
+                  Explore all study spots
+                </Link>
               </div>
 
-              <div className="mt-5 max-w-md overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950/50">
-                <Image
-                  src="/side-eye-monkey.png"
-                  alt="Side-eye monkey meme"
-                  width={500}
-                  height={500}
-                  className="h-48 w-full object-cover"
-                  priority
-                />
-              </div>
+              <p className="mt-3 text-xs text-zinc-500">
+                No login. No name. Takes a few seconds.
+              </p>
             </div>
 
             <div className="rounded-2xl border border-zinc-800 bg-zinc-950/50 p-4">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gold-500/15 text-2xl">
-                  🦉
-                </div>
+              <div className="flex items-center justify-between gap-3 mb-4">
                 <div>
-                  <p className="text-sm font-semibold text-zinc-100">Better than guessing</p>
-                  <p className="text-xs text-zinc-500">Lowkey saves wasted walks across campus.</p>
+                  <p className="text-sm font-semibold text-zinc-100">Current status</p>
+                  <p className="text-xs text-zinc-500">
+                    {fetchedAt
+                      ? `Updated ${formatDistanceToNow(new Date(fetchedAt), { addSuffix: true })}`
+                      : 'Live updates every 10 min'}
+                  </p>
                 </div>
+                <span className={clsx('w-2.5 h-2.5 rounded-full', detailState.statusDot)} />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-3">
                 <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
-                  <p className="text-lg mb-1">📍</p>
-                  <p className="text-xs font-medium text-zinc-200">This spot</p>
-                  <p className="text-xs text-zinc-500 mt-1">{location.name}</p>
+                  <p className="text-xs text-zinc-500 mb-1">This spot</p>
+                  <p className="text-sm font-semibold text-zinc-100">{location.name}</p>
                 </div>
 
                 <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
-                  <p className="text-lg mb-1">🙈</p>
-                  <p className="text-xs font-medium text-zinc-200">Anonymous</p>
-                  <p className="text-xs text-zinc-500 mt-1">No name needed</p>
+                  <p className="text-xs text-zinc-500 mb-1">Busyness</p>
+                  <p className="text-lg font-semibold text-zinc-100">
+                    {detailState.displayBusyness === null
+                      ? 'No live data yet'
+                      : `${detailState.displayBusyness}% busy`}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
+                    <p className="text-xs text-zinc-500 mb-1">Reports</p>
+                    <p className="text-lg font-semibold text-zinc-100">{detailState.reportCount}</p>
+                  </div>
+
+                  <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
+                    <p className="text-xs text-zinc-500 mb-1">Type</p>
+                    <p className="text-sm font-medium text-zinc-100">{detailState.categoryLabel}</p>
+                  </div>
                 </div>
 
                 <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
-                  <p className="text-lg mb-1">🚶</p>
-                  <p className="text-xs font-medium text-zinc-200">Check first</p>
-                  <p className="text-xs text-zinc-500 mt-1">Before walking there</p>
-                </div>
-
-                <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
-                  <p className="text-lg mb-1">🤝</p>
-                  <p className="text-xs font-medium text-zinc-200">Student-powered</p>
-                  <p className="text-xs text-zinc-500 mt-1">Built on community</p>
+                  <p className="text-xs text-zinc-500">
+                    Better than guessing. Also better than wasting a campus walk.
+                  </p>
                 </div>
               </div>
             </div>
@@ -385,95 +384,101 @@ export default function LocationDetailPage({ params }: PageProps) {
         </div>
       )}
 
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2 mb-2">
-              <span className={clsx('w-2.5 h-2.5 rounded-full', detailState.statusDot)} />
-              <span
+      {!isQrView && (
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                <span className={clsx('w-2.5 h-2.5 rounded-full', detailState.statusDot)} />
+                <span
+                  className={clsx(
+                    'text-xs font-medium px-2 py-0.5 rounded-full',
+                    detailState.badgeClass
+                  )}
+                >
+                  {detailState.badgeText}
+                </span>
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300">
+                  {detailState.categoryLabel}
+                </span>
+              </div>
+
+              <h1 className="text-3xl font-bold text-zinc-100 mb-2">{location.name}</h1>
+
+              <p className="text-sm text-zinc-500">
+                {detailState.summaryText}
+                {fetchedAt
+                  ? ` · Updated ${formatDistanceToNow(new Date(fetchedAt), { addSuffix: true })}`
+                  : ''}
+              </p>
+            </div>
+
+            <div className="sm:text-right">
+              <div
                 className={clsx(
-                  'text-xs font-medium px-2 py-0.5 rounded-full',
-                  detailState.badgeClass
+                  'text-3xl font-bold',
+                  detailState.displayBusyness === null
+                    ? 'text-zinc-300'
+                    : detailState.displayBusyness < 40
+                      ? 'text-emerald-400'
+                      : detailState.displayBusyness < 70
+                        ? 'text-yellow-400'
+                        : 'text-red-400'
                 )}
               >
-                {detailState.badgeText}
-              </span>
-              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300">
-                {detailState.categoryLabel}
-              </span>
-            </div>
-
-            <h1 className="text-3xl font-bold text-zinc-100 mb-2">{location.name}</h1>
-
-            <p className="text-sm text-zinc-500">
-              {detailState.summaryText}
-              {fetchedAt
-                ? ` · Updated ${formatDistanceToNow(new Date(fetchedAt), { addSuffix: true })}`
-                : ''}
-            </p>
-          </div>
-
-          <div className="sm:text-right">
-            <div
-              className={clsx(
-                'text-3xl font-bold',
-                detailState.displayBusyness === null
-                  ? 'text-zinc-300'
-                  : detailState.displayBusyness < 40
-                    ? 'text-emerald-400'
-                    : detailState.displayBusyness < 70
-                      ? 'text-yellow-400'
-                      : 'text-red-400'
-              )}
-            >
-              {detailState.displayBusyness === null ? '—' : `${detailState.displayBusyness}%`}
-            </div>
-            <div className="text-xs text-zinc-500">
-              {detailState.liveData
-                ? 'Current busyness'
-                : detailState.hasStudentReports
-                  ? 'Reported busyness'
-                  : 'No live reading yet'}
+                {detailState.displayBusyness === null ? '—' : `${detailState.displayBusyness}%`}
+              </div>
+              <div className="text-xs text-zinc-500">
+                {detailState.liveData
+                  ? 'Current busyness'
+                  : detailState.hasStudentReports
+                    ? 'Reported busyness'
+                    : 'No live reading yet'}
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="mt-5">
-          {detailState.displayBusyness !== null ? (
-            <BusynessBar busyness={detailState.displayBusyness} />
-          ) : (
-            <div className="text-sm text-zinc-500">
-              No live occupancy or recent student reports yet.
+          <div className="mt-5">
+            {detailState.displayBusyness !== null ? (
+              <BusynessBar busyness={detailState.displayBusyness} />
+            ) : (
+              <div className="text-sm text-zinc-500">
+                No live occupancy or recent student reports yet.
+              </div>
+            )}
+          </div>
+
+          {detailState.liveData && (
+            <div className="grid grid-cols-2 gap-3 mt-5">
+              <div className="bg-zinc-950/60 border border-zinc-800 rounded-xl p-4">
+                <div className="text-2xl font-bold text-zinc-100">{detailState.currentOccupancy}</div>
+                <div className="text-xs text-zinc-500">Estimated people here</div>
+              </div>
+              <div className="bg-zinc-950/60 border border-zinc-800 rounded-xl p-4">
+                <div className="text-2xl font-bold text-zinc-100">{detailState.capacity}</div>
+                <div className="text-xs text-zinc-500">Estimated capacity</div>
+              </div>
+            </div>
+          )}
+
+          {!detailState.liveData && detailState.reportCount > 0 && (
+            <div className="mt-5 bg-zinc-950/60 border border-zinc-800 rounded-xl p-4">
+              <div className="text-2xl font-bold text-zinc-100">{detailState.reportCount}</div>
+              <div className="text-xs text-zinc-500">Recent student reports</div>
             </div>
           )}
         </div>
+      )}
 
-        {detailState.liveData && (
-          <div className="grid grid-cols-2 gap-3 mt-5">
-            <div className="bg-zinc-950/60 border border-zinc-800 rounded-xl p-4">
-              <div className="text-2xl font-bold text-zinc-100">{detailState.currentOccupancy}</div>
-              <div className="text-xs text-zinc-500">Estimated people here</div>
-            </div>
-            <div className="bg-zinc-950/60 border border-zinc-800 rounded-xl p-4">
-              <div className="text-2xl font-bold text-zinc-100">{detailState.capacity}</div>
-              <div className="text-xs text-zinc-500">Estimated capacity</div>
-            </div>
-          </div>
-        )}
-
-        {!detailState.liveData && detailState.reportCount > 0 && (
-          <div className="mt-5 bg-zinc-950/60 border border-zinc-800 rounded-xl p-4">
-            <div className="text-2xl font-bold text-zinc-100">{detailState.reportCount}</div>
-            <div className="text-xs text-zinc-500">Recent student reports</div>
-          </div>
-        )}
+      <div id="student-report" className={clsx('scroll-mt-24', isQrView ? 'mb-4' : 'mb-6')}>
+      <CommunityReport
+        locationId={location.id}
+        locationName={location.name}
+        compact={isQrView}
+      />
       </div>
 
-      <div id="student-report" className="mb-6 scroll-mt-24">
-        <CommunityReport locationId={location.id} locationName={location.name} />
-      </div>
-
-      {detailState.liveData && (
+      {!isQrView && detailState.liveData && (
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
           <h2 className="text-lg font-semibold text-zinc-100 mb-2">Quick feedback</h2>
           <p className="text-sm text-zinc-500 mb-4">
@@ -483,15 +488,17 @@ export default function LocationDetailPage({ params }: PageProps) {
         </div>
       )}
 
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
-        <h2 className="text-lg font-semibold text-zinc-100 mb-2">Occupancy & report history</h2>
-        <p className="text-sm text-zinc-500 mb-4">
-          Useful if you want the bigger picture after checking the current vibe.
-        </p>
-        <OccupancyChart locationId={location.id} />
-      </div>
+      {!isQrView && (
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
+          <h2 className="text-lg font-semibold text-zinc-100 mb-2">Occupancy & report history</h2>
+          <p className="text-sm text-zinc-500 mb-4">
+            Useful if you want the bigger picture after checking the current vibe.
+          </p>
+          <OccupancyChart locationId={location.id} />
+        </div>
+      )}
 
-      {subLocations.length > 0 && detailState.liveData && (
+      {!isQrView && subLocations.length > 0 && detailState.liveData && (
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
           <h2 className="text-lg font-semibold text-zinc-100 mb-4">Floor breakdown</h2>
           <div className="space-y-4">
@@ -536,35 +543,51 @@ export default function LocationDetailPage({ params }: PageProps) {
         </div>
       )}
 
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="max-w-2xl">
-            <h2 className="text-lg font-semibold text-zinc-100 mb-2">Help us build this out further</h2>
-            <p className="text-sm text-zinc-400 leading-6">
-              This only gets better if students keep helping students. Every anonymous report makes
-              UW Study Spots more useful, and we are trying to expand coverage across more buildings
-              and study spaces on campus.
-            </p>
-          </div>
+      {isQrView ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-zinc-500 pb-2">
+          <Link href="/" className="hover:text-zinc-300 transition-colors">
+            Explore all study spots
+          </Link>
+          <a
+            href={instagramUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="hover:text-zinc-300 transition-colors"
+          >
+            Follow @uwstudyspots
+          </a>
+        </div>
+      ) : (
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="max-w-2xl">
+              <h2 className="text-lg font-semibold text-zinc-100 mb-2">Help us build this out further</h2>
+              <p className="text-sm text-zinc-400 leading-6">
+                This only gets better if students keep helping students. Every anonymous report makes
+                UW Study Spots more useful, and we are trying to expand coverage across more buildings
+                and study spaces on campus.
+              </p>
+            </div>
 
-          <div className="flex flex-wrap gap-3">
-            <a
-              href={instagramUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center justify-center rounded-xl bg-gold-500 px-4 py-2.5 text-sm font-semibold text-zinc-900 hover:opacity-90 transition-opacity"
-            >
-              Follow @uwstudyspots
-            </a>
-            <Link
-              href="/"
-              className="inline-flex items-center justify-center rounded-xl bg-zinc-800 px-4 py-2.5 text-sm font-medium text-zinc-200 hover:bg-zinc-700 transition-colors"
-            >
-              Explore all study spots
-            </Link>
+            <div className="flex flex-wrap gap-3">
+              <a
+                href={instagramUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center rounded-xl bg-gold-500 px-4 py-2.5 text-sm font-semibold text-zinc-900 hover:opacity-90 transition-opacity"
+              >
+                Follow our instagram
+              </a>
+              <Link
+                href="/"
+                className="inline-flex items-center justify-center rounded-xl bg-zinc-800 px-4 py-2.5 text-sm font-medium text-zinc-200 hover:bg-zinc-700 transition-colors"
+              >
+                Explore all study spots
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
