@@ -1,19 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 
-const BASELINE_VISITORS = 866
-
 export async function GET() {
+  const cutoff = new Date()
+  cutoff.setDate(cutoff.getDate() - 7)
+
   const { count, error } = await supabaseAdmin
     .from('site_visitors')
     .select('*', { count: 'exact', head: true })
+    .gte('last_seen', cutoff.toISOString())
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
   return NextResponse.json({
-    visitorCount: BASELINE_VISITORS + (count ?? 0),
+    visitorCount: count ?? 0,
   })
 }
 
