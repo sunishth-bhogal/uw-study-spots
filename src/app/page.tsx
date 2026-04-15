@@ -414,9 +414,9 @@ export default function Dashboard() {
 
               <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4">
                 <div className="text-2xl font-bold text-gold-400">
-                  {visitorCount === null ? '—' : `${visitorCount}`}
+                  {visitorCount === null ? '—' : `${visitorCount}+`}
                 </div>
-                <div className="mt-1 text-xs text-zinc-500">Estimated studentsreached to date</div>
+                <div className="mt-1 text-xs text-zinc-500">Students reached</div>
               </div>
             </div>
           </div>
