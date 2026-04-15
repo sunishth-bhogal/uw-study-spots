@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 
+const BASELINE_VISITORS = 866
+
 export async function GET() {
   const { count, error } = await supabaseAdmin
     .from('site_visitors')
@@ -11,7 +13,7 @@ export async function GET() {
   }
 
   return NextResponse.json({
-    visitorCount: count ?? 0,
+    visitorCount: BASELINE_VISITORS + (count ?? 0),
   })
 }
 
