@@ -181,7 +181,7 @@ export function LocationCard({ location, isFavourite = false, onToggleFavourite 
           : 'No recent reports yet'
 
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+    <div className="flex h-full flex-col rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
@@ -265,7 +265,7 @@ export function LocationCard({ location, isFavourite = false, onToggleFavourite 
 
       <Link
         href={`/location/${location.id}`}
-        className="inline-flex w-full items-center justify-center rounded-xl border border-zinc-700 bg-zinc-800/40 px-4 py-3 text-sm font-semibold text-zinc-100 transition-colors hover:bg-zinc-800"
+        className="mt-auto inline-flex w-full items-center justify-center rounded-xl border border-zinc-700 bg-zinc-800/40 px-4 py-3 text-sm font-semibold text-zinc-100 transition-colors hover:bg-zinc-800"
       >
         View spot details <span className="ml-2">→</span>
       </Link>

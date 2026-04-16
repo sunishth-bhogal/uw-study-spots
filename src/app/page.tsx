@@ -335,7 +335,7 @@ export default function Dashboard() {
   }, [busynessLocations])
 
   return (
-    <div>
+    <div className="pb-[calc(env(safe-area-inset-bottom)+6rem)] md:pb-8">
       <section className="mb-8 rounded-[28px] border border-zinc-800 bg-zinc-900/60 p-4 sm:p-8 lg:p-10">
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-start lg:gap-8">
           <div>
